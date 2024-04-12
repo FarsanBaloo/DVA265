@@ -22,7 +22,7 @@ class GA:
         # Begin just with a simple fitness function
         
     
-            
+    
         
         
         ##############################################################
