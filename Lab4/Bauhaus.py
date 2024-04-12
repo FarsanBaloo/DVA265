@@ -136,7 +136,7 @@ if __name__ == "__main__":
     
     print(f"Time ended at:, {stoptime - starttime},seconds")
     print(f'The goal to reach was: {terminateGoal}')
-    print(agent.population)
+ 
 
 
 
