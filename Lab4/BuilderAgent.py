@@ -15,9 +15,9 @@ class Builder():
         # 4 = toilet seat
         # 5 = tab
         # 6 = shower cabin
-        self.inventory = np.random.randint(40, size=7)
+        self.inventory = np.random.randint(10, size=7)
         #self.inventory = np.array([1,0,3,1,0,0,0])
-        self.modules = np.zeros(7)
+        self.modules = np.zeros(5)
         self.sell_list = np.zeros(7)
         self.buy_list = np.zeros(7)
         self.money = 750000
@@ -39,20 +39,15 @@ class Builder():
         # 2 = living room
         # 3 = hall
         # 4 = garret
-        self.roomCountNeeded = np.array([4,2,1,0,1]) 
-
+        self.roomCountNeeded = np.array([4, 2, 1, 0, 1])
 
     def check_module(self):
         components = self.inventory.copy()
         print("Components:", components)
         modules = self.modules.copy()
-        #modules[0] = 4
-        #modules[2] = 1
         print("START Modules:", modules, "\n", "-"*20)
         loops = 0
-        #any_room = np.any(np.all(self.moduleConstrains <= components, axis=1))
-        #print(any_room)
-        #print()
+
         while np.any(np.all(self.moduleConstrains <= components, axis=1)):
             loops += 1
             print("Iteration:", loops, "\n", "="*20)
@@ -63,9 +58,11 @@ class Builder():
             print("-"*10)
             print("Unupdated Modules:", modules)
             print("-"*10)
+
             if build == False:
                 print("---WE BREAK!---")
                 break
+
             components = component.copy()
             modules = module.copy()
             print("Updated Modules:", modules)
@@ -91,13 +88,21 @@ class Builder():
         return component, modules, False
 
     def generateSellBuyList(self):
-        #total_modules = np.zeros(7)
-        #for i, a in enumerate(self.moduleConstrains):
-        #    total_modules += a*self.roomCountNeeded[i]
-        print(self.totalCompNeed)
-        agent_needs = self.inventory - self.totalCompNeed
-        print("Inventory:", self.inventory)
-        print("We Need:", agent_needs)
+        """Generate a sell and buy list, depending on what the Agent has in its inventory"""
+        room_need = self.roomCountNeeded - self.modules
+        print("Room need:", room_need)
+        total_need = np.zeros(7)
+        for i, a in enumerate(self.moduleConstrains):
+            total_need += a * room_need[i]
+        print("Total need", total_need)
+        print("Inventory", self.inventory)
+        agent_needs = self.inventory - total_need
+        sell_list = [x if x >= 0 else 0 for x in agent_needs]
+        buy_list = [-x if x <= 0 else 0 for x in agent_needs]
+        print("We have too many of:", sell_list)
+        print("We need to buy:", buy_list)
+        self.buy_list = np.array(buy_list)
+        self.sell_list = np.array(sell_list)
 
     def doSomething(self):
         self.check_module()
@@ -105,7 +110,8 @@ class Builder():
         self.generateSellBuyList()
 
     def generateGenome(self):
-        return (np.array([self.name, self.money, self.houses]) + self.inventory + self.modules + self.sell_list + self.buy_list + np.array([False]))
+        return (np.array([self.name, self.money, self.houses])
+                + self.inventory + self.modules + self.sell_list + self.buy_list + np.array([False]))
 
     
   
@@ -113,7 +119,7 @@ class Builder():
 
 if __name__ == "__main__":
     agent = Builder("agent")
-    agent.generateSellBuyList()
+    agent.doSomething()
 
 
 
