@@ -1,5 +1,6 @@
 import numpy as np
-from Builder import BobtheBuilder
+from MaterialAgent import Bauhaus
+from BuilderAgent import Builder
 
 
 
@@ -9,9 +10,10 @@ if __name__ == "__main__":
     maxGenerations = 1000
 
 
-    # Produce a Genetic Agent Object
-    agentBob = BobtheBuilder("Bauhaus")
+    agentBob = Builder("Bauhaus")
     agentBob.check_module()
+    
+    agentBauhaus = Builder("Bauhaus")
 
 
 

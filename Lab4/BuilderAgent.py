@@ -1,7 +1,6 @@
 import numpy as np
-import Bauhaus 
 
-class BobtheBuilder():
+class Builder():
 
     def __init__(self, name):
         """
@@ -101,14 +100,7 @@ class BobtheBuilder():
 
 
 
-if __name__ == "__main__":
 
-    # Produce a Genetic Agent Object
-    agent = Agent("Bauhaus")
-    agent.check_module()
- 
-
-    
     
   
  
