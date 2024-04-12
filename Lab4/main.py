@@ -4,7 +4,7 @@ from BuilderAgent import Builder
 
 
 class GA:
-    def __init__(self,NumberOfIndividuals = 10, NumberOfGens = 10, crossOverProbability = 0.6, mutationProbability = 0.03, terminateGoal = 0, maxGenerations = 100):
+    def __init__(crossOverProbability = 0.6, mutationProbability = 0.03, terminateGoal = 0, maxGenerations = 100):
         self.population = np.array([])
         self.NumberOfIndividuals = NumberOfIndividuals
         self.NumberOfGens = NumberOfGens
@@ -19,18 +19,32 @@ class GA:
         self.cumulativesum = np.array([])
  
 
-   
     def CalculateFitness(self,agent):
+        
+        # just a simple fitness function to test not sow good
+        agent.fitness = agent.houses
+        
+        
+        ##############################################################
+        # not used!, need normalize profit to be between 0 and 1  
         self.sellpricehouse = 1000000
         
         cashSellHouse = agent.houses * self.sellpricehouse
+        costBuildHouses = agent.houses*(np.sum(agent.roomCountNeeded * agent.ModuleCost))
         unusedMaterialCost = np.sum(agent.inventory * agent.ComponentCost)
         unusedModulCost = np.sum(agent.modules * agent.ModuleCost)
         
+        totalmaterialcost = costBuildHouses + unusedMaterialCost + unusedModulCost
+        profit = cashSellHouse - totalmaterialcost
+        ################################################################
         
-        agent.fitness = cashSellHouse
         
         
+        
+
+
+
+
 
            
     def calculatePropability(self):
