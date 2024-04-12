@@ -4,10 +4,8 @@ from BuilderAgent import Builder
 
 
 class GA:
-    def __init__(crossOverProbability = 0.6, mutationProbability = 0.03, terminateGoal = 0, maxGenerations = 100):
-        self.population = np.array([])
-        self.NumberOfIndividuals = NumberOfIndividuals
-        self.NumberOfGens = NumberOfGens
+    def __init__(self, population, crossOverProbability = 0.6, mutationProbability = 0.03, terminateGoal = 0, maxGenerations = 100):
+        self.population = population
         self.crossOverProbability = crossOverProbability
         self.mutationProbability = mutationProbability
         self.terminateGoal = terminateGoal
@@ -19,14 +17,16 @@ class GA:
         self.cumulativesum = np.array([])
  
 
-    def CalculateFitness(self,agent):
+    def CalculateFitness(self,population):
         
-        # just a simple fitness function to test not sow good
-        agent.fitness = agent.houses
+        # Begin just with a simple fitness function
+        
+    
+            
         
         
         ##############################################################
-        # not used!, need normalize profit to be between 0 and 1  
+        # not used maybe later?!, need normalize profit to be between 0 and 1  
         self.sellpricehouse = 1000000
         
         cashSellHouse = agent.houses * self.sellpricehouse
@@ -35,8 +35,11 @@ class GA:
         unusedModulCost = np.sum(agent.modules * agent.ModuleCost)
         
         totalmaterialcost = costBuildHouses + unusedMaterialCost + unusedModulCost
+        
         profit = cashSellHouse - totalmaterialcost
         ################################################################
+        
+        return agent.fitness
         
         
         
@@ -141,9 +144,19 @@ class GA:
 if __name__ == "__main__":
     crossOverProbability = 0.6
     mutationProbability = 0.03
+    terminateGoal = 0
     maxGenerations = 1000
+    
+    agents = []
 
-    agentBuilder = Builder("Bauhaus")
+    for i in range(3):
+        agent = Builder("agent" + str(i))
+    agents.append(agent)
+    
+    GA = GA(agents, crossOverProbability, mutationProbability, terminateGoal , maxGenerations)
+   
+      
+    agentBuilder = Builder("agent")
     agentBuilder.check_module()
     
     agentBauhaus = Builder("Bauhaus")
