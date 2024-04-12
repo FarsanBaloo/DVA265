@@ -32,14 +32,14 @@ class Builder():
         ])
         self.ComponentCost = [2500,8500,3450,75000,2995,2350,8300] 
         self.ModuleCost = np.sum(self.moduleConstrains * self.ComponentCost)
-
+        self.totalCompNeed = np.array([8, 1, 15, 9, 2, 2, 2])
         self.ModuleNames = np.array(["bedroom", "bath room", "living room", "hall", "garret"])  
         # 0 = bed room
         # 1 = bath room
         # 2 = living room
         # 3 = hall
         # 4 = garret
-        self.roomCountNeeded = np.array([4,2,1,1,1]) 
+        self.roomCountNeeded = np.array([4,2,1,0,1]) 
 
 
     def check_module(self):
@@ -90,22 +90,30 @@ class Builder():
         print("NON FOUND")
         return component, modules, False
 
+    def generateSellBuyList(self):
+        #total_modules = np.zeros(7)
+        #for i, a in enumerate(self.moduleConstrains):
+        #    total_modules += a*self.roomCountNeeded[i]
+        print(self.totalCompNeed)
+        agent_needs = self.inventory - self.totalCompNeed
+        print("Inventory:", self.inventory)
+        print("We Need:", agent_needs)
 
+    def doSomething(self):
+        self.check_module()
+        self.buildHouse()
+        self.generateSellBuyList()
 
-    def check_value(self):
-        pass
-
-    def check_fitness(self):
-        pass
-
-
-
+    def generateGenome(self):
+        return (np.array([self.name, self.money, self.houses]) + self.inventory + self.modules + self.sell_list + self.buy_list + np.array([False]))
 
     
   
  
 
-
+if __name__ == "__main__":
+    agent = Builder("agent")
+    agent.generateSellBuyList()
 
 
 

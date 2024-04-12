@@ -17,12 +17,12 @@ class GA:
         self.cumulativesum = np.array([])
  
 
-    def CalculateFitness(self,population):
+    def CalculateFitness(self, population):
         
         # Begin just with a simple fitness function
         
     
-    
+            
         
         
         ##############################################################
