@@ -41,7 +41,9 @@ class GA:
         
         return agent.fitness
         
-        
+
+    def Crossover(self):
+        pass
         
         
 
@@ -151,8 +153,14 @@ if __name__ == "__main__":
 
     for i in range(3):
         agent = Builder("agent" + str(i))
-    agents.append(agent)
-    
+        agents.append(agent)
+
+    for agent in agents:
+        print(f"======={agent.name}'s turn! =========")
+        agent.doSomething()
+        print(agent.generateGenome())
+
+
     GA = GA(agents, crossOverProbability, mutationProbability, terminateGoal , maxGenerations)
    
       

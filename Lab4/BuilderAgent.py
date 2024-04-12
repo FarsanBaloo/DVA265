@@ -5,7 +5,7 @@ class Builder():
     def __init__(self, name):
         """
         Inventory: Door, Outside-Door, Window, Wall-Module, Toilet Seat, Tab, Shower Cabin
-        Modules: Floor, Bed room, bath room, living room, hall, garret
+        Modules: Floor, Bedroom, bath room, living room, hall, garret
         """
         self.name = name
         # 0 = door 
@@ -15,11 +15,11 @@ class Builder():
         # 4 = toilet seat
         # 5 = tab
         # 6 = shower cabin
-        self.inventory = np.random.randint(10, size=7)
+        self.inventory = np.random.randint(10, size=7, dtype="int32")
         #self.inventory = np.array([1,0,3,1,0,0,0])
-        self.modules = np.zeros(5)
-        self.sell_list = np.zeros(7)
-        self.buy_list = np.zeros(7)
+        self.modules = np.zeros(5, dtype="int32")
+        self.sell_list = np.zeros(7, dtype="int32")
+        self.buy_list = np.zeros(7, dtype="int32")
         self.money = 750000
         self.houses = 0
         self.fitness = 0
@@ -110,8 +110,8 @@ class Builder():
         self.generateSellBuyList()
 
     def generateGenome(self):
-        return (np.array([self.name, self.money, self.houses])
-                + self.inventory + self.modules + self.sell_list + self.buy_list + np.array([False]))
+        base = np.array([self.money, self.houses], dtype="int32")
+        return np.concatenate((base, self.inventory, self.modules, self.sell_list, self.buy_list, np.array([True])))
 
     
   
@@ -120,6 +120,8 @@ class Builder():
 if __name__ == "__main__":
     agent = Builder("agent")
     agent.doSomething()
+    genome = agent.generateGenome()
+    print(genome[-1])
 
 
 
