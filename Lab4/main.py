@@ -1,9 +1,46 @@
 import numpy as np
 import GA as ga
 import time
+import random
+
+class Bauhaus:
+    def __init__(self):
+        self.inventory = {"name": "Bauhaus",
+                          "inventory": np.array([20, 20, 20, 20, 20, 20, 20]),
+                          "money": 0
+                          }
+
+    def init_inventory(self):
+        """ Inventory: Door, Outside-Door, Window, Wall-Module, Toilet Seat, Tab, Shower Cabin"""
+
+        inventory = {"name": "Bauhaus",
+                      "inventory": np.array([20, 20, 20, 20, 20, 20, 20]),
+                      "money": 0
+                      }
+        return inventory
+    def Initiate_Bauhaus(self):
+        pass
 
 
+class Agent(Bauhaus):
+    def __init__(self, name):
+        self.inventory = self.init_inventory(name)
 
+    def init_inventory(self):
+        """
+        Inventory: Door, Outside-Door, Window, Wall-Module, Toilet Seat, Tab, Shower Cabin
+        Modules: Floor, Bed room, bath room, living room, hall, garret
+        """
+
+        self.inventory = {"name": name,
+                          "inventory": np.array([0, 0, 0, 0, 0, 0, 0]),
+                          "money": 5000 * random.randint(10, 30),
+                          "modules": np.array([0, 0, 0, 0, 0, 0]),
+                          "full_house": 0
+                          }
+
+    def value_component(self):
+        pass
 
 
 
