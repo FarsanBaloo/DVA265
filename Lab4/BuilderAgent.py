@@ -15,8 +15,8 @@ class Builder():
         # 4 = toilet seat
         # 5 = tab
         # 6 = shower cabin
-        self.inventory = np.random.randint(3, size=7, dtype="int32")
-        #self.inventory = np.array([1,0,3,1,0,0,0])
+        #self.inventory = np.random.randint(3, size=7, dtype="int32")
+        self.inventory = np.array([20,30,11,23,11,6,33])
         #self.modules = np.zeros(5, dtype="int32")
         self.modules = np.array([4,2,1,0,1])
         self.sell_list = np.zeros(7, dtype="int32")
@@ -94,6 +94,26 @@ class Builder():
                 return component, modules, True
         print("NON FOUND")
         return component, modules, False
+    
+    def testgenerateSellBuyList(self):
+        """Generate a sell and buy list, depending on what the Agent has in its inventory"""
+        room_need = self.roomCountNeeded - self.modules
+        print("Room need:", room_need)
+        
+        TransponatmoduleConstrains = self.moduleConstrains.transpose()
+        total_need = np.dot(TransponatmoduleConstrains, room_need)
+        
+        print("Total need", total_need)
+        print("Inventory", self.inventory)
+        
+        agent_needs = self.inventory - total_need
+        self.sell_list = np.where(agent_needs > 0 , agent_needs, 0)
+        self.buy_list = np.where(agent_needs < 0, np.abs(agent_needs), 0)
+        
+        print("We have too many of:", self.sell_list)
+        print("We need to buy:", self.buy_list)
+        
+        
 
     def generateSellBuyList(self):
         """Generate a sell and buy list, depending on what the Agent has in its inventory"""
@@ -109,13 +129,14 @@ class Builder():
         buy_list = [-x if x <= 0 else 0 for x in agent_needs]
         print("We have too many of:", sell_list)
         print("We need to buy:", buy_list)
-        self.buy_list = np.array(buy_list)
-        self.sell_list = np.array(sell_list)
+        self.buy_list = np.array(buy_list, dtype="int32")
+        self.sell_list = np.array(sell_list, dtype="int32")
 
     def doSomething(self):
         self.check_module()
         self.buildHouse()
-        self.generateSellBuyList()
+        #self.generateSellBuyList()
+        self.testgenerateSellBuyList()
 
     def generateGenome(self):
         base = np.array([self.money, self.houses], dtype="int32")
