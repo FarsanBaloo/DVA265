@@ -15,8 +15,8 @@ class Builder():
         # 4 = toilet seat
         # 5 = tab
         # 6 = shower cabin
-        #self.inventory = np.random.randint(3, size=7, dtype="int32")
-        self.inventory = np.array([20,30,11,23,11,6,33])
+        self.inventory = np.random.randint(3, size=7, dtype="int32")
+        #self.inventory = np.array([20,30,11,23,11,6,33])
         #self.modules = np.zeros(5, dtype="int32")
         self.modules = np.array([4,2,1,0,1])
         self.sell_list = np.zeros(7, dtype="int32")
