@@ -15,9 +15,10 @@ class Builder():
         # 4 = toilet seat
         # 5 = tab
         # 6 = shower cabin
-        self.inventory = np.random.randint(10, size=7, dtype="int32")
+        self.inventory = np.random.randint(3, size=7, dtype="int32")
         #self.inventory = np.array([1,0,3,1,0,0,0])
-        self.modules = np.zeros(5, dtype="int32")
+        #self.modules = np.zeros(5, dtype="int32")
+        self.modules = np.array([4,2,1,0,1])
         self.sell_list = np.zeros(7, dtype="int32")
         self.buy_list = np.zeros(7, dtype="int32")
         self.money = 750000
@@ -69,7 +70,14 @@ class Builder():
         self.modules = modules
 
     def buildHouse(self):
-        pass
+        modules = self.modules.copy()
+        roomCount = self.roomCountNeeded.copy()
+        while np.any(np.all(roomCount <= modules)):
+            modules = modules - roomCount
+            self.houses += 1
+            print(f"----{self.name.upper()} BUILT A HOUSE!----")
+            self.modules = modules
+        return
 
     def buildModule(self, element, component, modules):
         for e in element[0]:
@@ -111,17 +119,23 @@ class Builder():
 
     def generateGenome(self):
         base = np.array([self.money, self.houses], dtype="int32")
-        return np.concatenate((base, self.inventory, self.modules, self.sell_list, self.buy_list, np.array([True])))
+        return np.concatenate((
+            base.copy(),
+            self.inventory.copy(),
+            self.modules.copy(),
+            self.sell_list.copy(),
+            self.buy_list.copy(),
+            np.array([False])))
 
     
   
  
 
 if __name__ == "__main__":
-    agent = Builder("agent")
+    agent = Builder("Oscar")
     agent.doSomething()
     genome = agent.generateGenome()
-    print(genome[-1])
+    print(genome)
 
 
 
