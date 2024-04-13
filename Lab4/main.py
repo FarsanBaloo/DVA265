@@ -4,8 +4,8 @@ from BuilderAgent import Builder
 
 
 class GA:
-    def __init__(self, population, crossOverProbability = 0.6, mutationProbability = 0.03, terminateGoal = 0, maxGenerations = 100):
-        self.population = population
+    def __init__(self, numberOfIndividuals = 4, crossOverProbability = 0.6, mutationProbability = 0.03, terminateGoal = 0, maxGenerations = 100):
+        self.numnberOfIndividuals = numberOfIndividuals
         self.crossOverProbability = crossOverProbability
         self.mutationProbability = mutationProbability
         self.terminateGoal = terminateGoal
@@ -16,14 +16,32 @@ class GA:
         self.IndividualsPropability = np.array([])
         self.cumulativesum = np.array([])
  
+ 
+    def GeneratePopulation(self):
+        agents = []
+        for i in range(self.numnberOfIndividuals):
+            agent = Builder("agent" + str(i))
+            agents.append(agent)
+        
+        self.population = agents
+
 
     def CalculateFitness(self, population):
         
-        # Begin just with a simple fitness function
         
+        for agent in population:
+
+            agentGenome = agent.generateGenome()
+         
+            money = agentGenome[0]       # stämmer
+            houses = agentGenome[1]      # stämmer
+            inventory = agentGenome[2:9] # stämmer
+            modules = agentGenome[10:15] # Verkar inte få ut några moduler?
     
-            
+            print(f'Agent Name: {agent.name} have money: {money} Houses built: {houses} inventory: {inventory} Modules built: {modules}')
         
+        
+
         
         ##############################################################
         # not used maybe later?!, need normalize profit to be between 0 and 1  
@@ -39,18 +57,10 @@ class GA:
         profit = cashSellHouse - totalmaterialcost
         ################################################################
         
-        return agent.fitness
-        
 
     def Crossover(self):
         pass
         
-        
-
-
-
-
-
            
     def calculatePropability(self):
         # Calculate each individual propability in a normalized fashion
@@ -82,8 +92,7 @@ class GA:
         pass
 
     def evaluateRanked(self,agent1,agent2,offspring1,offspring2):
-        pass
-        
+        pass    
       
     def updatePopulation(self):
         pass
@@ -144,29 +153,31 @@ class GA:
 
 
 if __name__ == "__main__":
+    numberOfIndividuals = 4
     crossOverProbability = 0.6
     mutationProbability = 0.03
     terminateGoal = 0
     maxGenerations = 1000
     
-    agents = []
-
-    for i in range(3):
-        agent = Builder("agent" + str(i))
-        agents.append(agent)
-
-    for agent in agents:
+    
+    GA = GA(numberOfIndividuals, crossOverProbability, mutationProbability, terminateGoal , maxGenerations)
+    
+    
+    GA.GeneratePopulation()
+    print(GA.population)
+    
+    
+    for agent in GA.population:
+        
         print(f"======={agent.name}'s turn! =========")
         agent.doSomething()
-        print(agent.generateGenome())
-
-
-    GA = GA(agents, crossOverProbability, mutationProbability, terminateGoal , maxGenerations)
-   
-      
-    agentBuilder = Builder("agent")
-    agentBuilder.check_module()
+        agent.generateGenome()
+        #print(agent.generateGenome())
     
+    
+    GA.CalculateFitness(GA.population)
+
+
     agentBauhaus = Builder("Bauhaus")
 
 
