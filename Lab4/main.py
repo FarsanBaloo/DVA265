@@ -12,12 +12,13 @@ class GA:
         self.countGeneration = 0
         self.maxGenerations = maxGenerations
         self.newpopulation = np.array([])
-        self.Individualfitness = np.array([])
+        self.populationFitness = np.array([])
         self.IndividualsPropability = np.array([])
         self.cumulativesum = np.array([])
  
  
     def GeneratePopulation(self):
+        
         agents = []
         for i in range(self.numnberOfIndividuals):
             agent = Builder("agent" + str(i))
@@ -28,35 +29,47 @@ class GA:
 
     def CalculateFitness(self, population):
         
+        sellPriceHouse = 1000000
+        populationFitness = []
         
-        for agent in population:
-
-            agentGenome = agent.generateGenome()
-         
-            money = agentGenome[0]       # stämmer
-            houses = agentGenome[1]      # stämmer
-            inventory = agentGenome[2:9] # stämmer
-            modules = agentGenome[10:15] # Verkar inte få ut några moduler?
+        totalPopulationMoney = sum(agents.money for agents in population)
+        amounOfModulesBestAgentbuilt = max(np.sum(agents.modules) for agents in population)
+        
     
-            print(f'Agent Name: {agent.name} have money: {money} Houses built: {houses} inventory: {inventory} Modules built: {modules}')
+        for agent in population:
+            
+            print(f'Agent Name: {agent.name} have money: {agent.money} Modules built: {np.sum(agent.modules)}')
+            
+            # sell the houses and bring the cash to the agent
+            agent.money += agent.houses * sellPriceHouse
+            agent.houses =  0
+            
+            if totalPopulationMoney > 0:
+                normalizedMoneyArchivment = agent.money / totalPopulationMoney
+            else:
+                normalizedMoneyArchivment = 0
+            
+            normalizedModuleArchivment = 0
+            
+            if amounOfModulesBestAgentbuilt > 0:
+                normalizedModuleArchivment = np.sum(agent.modules) / amounOfModulesBestAgentbuilt
+            
+            fitness = (normalizedMoneyArchivment * 0.8 + normalizedModuleArchivment * 0.2) * 100
+            populationFitness.append(fitness)
         
+            
+        populationFitness = np.array(populationFitness)
+        totalFitness = np.sum(populationFitness)
         
-
+        if totalFitness > 0:
+            self.PopulationFitness = populationFitness / totalFitness
+        else:
+            self.PopulationFitness = np.zeros(len(populationFitness))
         
-        ##############################################################
-        # not used maybe later?!, need normalize profit to be between 0 and 1  
-        self.sellpricehouse = 1000000
+        print(f'Fitness in the population: {self.PopulationFitness}')
         
-        cashSellHouse = agent.houses * self.sellpricehouse
-        costBuildHouses = agent.houses*(np.sum(agent.roomCountNeeded * agent.ModuleCost))
-        unusedMaterialCost = np.sum(agent.inventory * agent.ComponentCost)
-        unusedModulCost = np.sum(agent.modules * agent.ModuleCost)
-        
-        totalmaterialcost = costBuildHouses + unusedMaterialCost + unusedModulCost
-        
-        profit = cashSellHouse - totalmaterialcost
-        ################################################################
-        
+        return self.populationFitness
+            
 
     def Crossover(self):
         pass
