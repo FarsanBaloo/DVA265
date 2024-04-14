@@ -32,43 +32,28 @@ class GA:
         sellPriceHouse = 1000000
         populationFitness = []
         
-        totalPopulationMoney = sum(agents.money for agents in population)
-        amounOfModulesBestAgentbuilt = max(np.sum(agents.modules) for agents in population)
+        populationMoney = np.array([agents.money for agents in population])
+        populationHouses = np.array([agents.modules for agents in population])
+        populationModules = np.array([np.sum(agents.modules) for agents in population])
+        amountOfmaxModules = np.max(populationModules)
         
-    
+        # bring in the money and sell the houses
+        populationMoney = populationMoney + (populationHouses * sellPriceHouse)
+        totalPopulationMoney = np.sum(populationMoney)
+        
         for agent in population:
-            
-            print(f'Agent Name: {agent.name} have money: {agent.money} Modules built: {np.sum(agent.modules)}')
-            
-            # sell the houses and bring the cash to the agent
-            agent.money += agent.houses * sellPriceHouse
-            agent.houses =  0
-            
-            if totalPopulationMoney > 0:
-                normalizedMoneyArchivment = agent.money / totalPopulationMoney
-            else:
-                normalizedMoneyArchivment = 0
-            
-            normalizedModuleArchivment = 0
-            
-            if amounOfModulesBestAgentbuilt > 0:
-                normalizedModuleArchivment = np.sum(agent.modules) / amounOfModulesBestAgentbuilt
-            
-            fitness = (normalizedMoneyArchivment * 0.8 + normalizedModuleArchivment * 0.2) * 100
-            populationFitness.append(fitness)
+            agent.houses = 0
+            agent.money = populationMoney[agent]
         
+        normalizedMoney = np.where(populationMoney > 0, populationMoney / totalPopulationMoney, 0)
+        
+        
+        
+        
+        
+   
             
-        populationFitness = np.array(populationFitness)
-        totalFitness = np.sum(populationFitness)
-        
-        if totalFitness > 0:
-            self.PopulationFitness = populationFitness / totalFitness
-        else:
-            self.PopulationFitness = np.zeros(len(populationFitness))
-        
-        print(f'Fitness in the population: {self.PopulationFitness}')
-        
-        return self.populationFitness
+
             
 
     def Crossover(self):
