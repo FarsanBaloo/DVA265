@@ -34,24 +34,29 @@ class GA:
         populationMoney = np.array([agents.money for agents in population])
         populationHouses = np.array([agents.houses for agents in population])
         populationModules = np.array([np.sum(agents.modules) for agents in population])
+        # Get the agent with the most modules built
         amountOfmaxModules = np.max(populationModules)
       
         populationMoney += populationHouses * sellPriceHouse
         totalPopulationMoney = np.sum(populationMoney)
         
         normalizedPopulationMoney = np.divide(populationMoney, totalPopulationMoney , where = totalPopulationMoney > 0)
+        # Try to do a estamation of performence of the agents of amount of modules he have built against the agent with the most modules
         normalizedPopulationModules = np.divide(populationModules, amountOfmaxModules, where = amountOfmaxModules > 0)
         
         populationFitness = (normalizedPopulationMoney * 0.8 + normalizedPopulationModules * 0.2) * 100
         totalFitnessPopulation = np.sum(populationFitness)
+ 
         normalizedPopulationFitness = np.divide(populationFitness,totalFitnessPopulation, where = totalFitnessPopulation > 0)
+        print(f"Normalized population fitness: {normalizedPopulationFitness}")
         
         # bring in the money and sell the houses
         for i , agent in enumerate(population):
+            print(f"Agent {agent.name} built {agent.houses} houses and {agent.modules} modules")
             agent.houses = 0
             agent.money = populationMoney[i]
             agent.fitness = normalizedPopulationFitness[i]
-            print(f"Agent {agent.name} has {agent.money} money and {agent.modules} modules and has a fitness of {agent.fitness} %")
+            print(f"And has now {agent.money} after selling houses with a fitness of {agent.fitness} %")
         
         self.populationFitness = normalizedPopulationFitness
         
