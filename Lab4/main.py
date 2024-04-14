@@ -30,24 +30,32 @@ class GA:
     def CalculateFitness(self, population):
         
         sellPriceHouse = 1000000
-        populationFitness = []
         
         populationMoney = np.array([agents.money for agents in population])
-        populationHouses = np.array([agents.modules for agents in population])
+        populationHouses = np.array([agents.houses for agents in population])
         populationModules = np.array([np.sum(agents.modules) for agents in population])
         amountOfmaxModules = np.max(populationModules)
-        
-        # bring in the money and sell the houses
-        populationMoney = populationMoney + (populationHouses * sellPriceHouse)
+      
+        populationMoney += populationHouses * sellPriceHouse
         totalPopulationMoney = np.sum(populationMoney)
         
-        for agent in population:
+        normalizedPopulationMoney = np.divide(populationMoney, totalPopulationMoney , where = totalPopulationMoney > 0)
+        normalizedPopulationModules = np.divide(populationModules, amountOfmaxModules, where = amountOfmaxModules > 0)
+        
+        populationFitness = (normalizedPopulationMoney * 0.8 + normalizedPopulationModules * 0.2) * 100
+        totalFitnessPopulation = np.sum(populationFitness)
+        normalizedPopulationFitness = np.divide(populationFitness,totalFitnessPopulation, where = totalFitnessPopulation > 0)
+        
+        # bring in the money and sell the houses
+        for i , agent in enumerate(population):
             agent.houses = 0
-            agent.money = populationMoney[agent]
+            agent.money = populationMoney[i]
+            agent.fitness = normalizedPopulationFitness[i]
+            print(f"Agent {agent.name} has {agent.money} money and {agent.modules} modules and has a fitness of {agent.fitness} %")
         
-        normalizedMoney = np.where(populationMoney > 0, populationMoney / totalPopulationMoney, 0)
+        self.populationFitness = normalizedPopulationFitness
         
-        
+        return self.populationFitness
         
         
         
