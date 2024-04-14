@@ -29,6 +29,8 @@ class GA:
 
     def CalculateFitness(self, population):
         
+        # prototype för att ha något att utgå ifrån för en selection så får vi ändra den till det bätte senare  
+        
         sellPriceHouse = 1000000
         
         populationMoney = np.array([agents.money for agents in population])
@@ -41,10 +43,12 @@ class GA:
         totalPopulationMoney = np.sum(populationMoney)
         
         normalizedPopulationMoney = np.divide(populationMoney, totalPopulationMoney , where = totalPopulationMoney > 0)
+        print(f"Normalized population money: {normalizedPopulationMoney}")
         # Try to do a estamation of performence of the agents of amount of modules he have built against the agent with the most modules
         normalizedPopulationModules = np.divide(populationModules, amountOfmaxModules, where = amountOfmaxModules > 0)
+        print(f"Normalized population modules: {normalizedPopulationModules}")
         
-        populationFitness = (normalizedPopulationMoney * 0.8 + normalizedPopulationModules * 0.2) * 100
+        populationFitness = (normalizedPopulationMoney * 0.9 + normalizedPopulationModules * 0.1) * 100
         totalFitnessPopulation = np.sum(populationFitness)
  
         normalizedPopulationFitness = np.divide(populationFitness,totalFitnessPopulation, where = totalFitnessPopulation > 0)
@@ -52,11 +56,10 @@ class GA:
         
         # bring in the money and sell the houses
         for i , agent in enumerate(population):
-            print(f"Agent {agent.name} built {agent.houses} houses and {agent.modules} modules")
-            agent.houses = 0
             agent.money = populationMoney[i]
             agent.fitness = normalizedPopulationFitness[i]
-            print(f"And has now {agent.money} after selling houses with a fitness of {agent.fitness} %")
+            print(f"{agent.name} has {agent.money} after selling {agent.houses} built houses and have now fitness {agent.fitness} % he built {agent.modules} modules")
+            agent.houses = 0
         
         self.populationFitness = normalizedPopulationFitness
         
@@ -177,16 +180,22 @@ if __name__ == "__main__":
     GA.GeneratePopulation()
     print(GA.population)
     
+    generation = 0
     
-    for agent in GA.population:
+    while generation < 1:
         
-        print(f"======={agent.name}'s turn! =========")
-        agent.doSomething()
-        agent.generateGenome()
-        #print(agent.generateGenome())
+        for agent in GA.population:
+            
+            generation += 1
+            print(f"Generation: {generation}")
+            
+            print(f"======={agent.name}'s turn! =========")
+            agent.doSomething()
+            agent.generateGenome()
+            #print(agent.generateGenome())
     
     
-    GA.CalculateFitness(GA.population)
+        GA.CalculateFitness(GA.population)
 
 
     agentBauhaus = Builder("Bauhaus")
