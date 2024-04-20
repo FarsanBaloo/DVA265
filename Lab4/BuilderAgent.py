@@ -1,8 +1,10 @@
 import numpy as np
+import AgentGA as GA
+import random
 
 class Builder():
 
-    def __init__(self, name):
+    def __init__(self, name, personality=0):
         """
         Inventory: Door, Outside-Door, Window, Wall-Module, Toilet Seat, Tab, Shower Cabin
         Modules: Floor, Bedroom, bath room, living room, hall, garret
@@ -16,9 +18,10 @@ class Builder():
         # 5 = tab
         # 6 = shower cabin
         self.inventory = np.random.randint(9, size=7, dtype="int32")
+        #self.inventory = np.zeros(7, dtype="int32")
         #self.inventory = np.array( [1,0,2,1,0,0,6])
-        #self.modules = np.zeros(5, dtype="int32")
-        self.modules = np.array([4,2,1,0,1])
+        self.modules = np.zeros(5, dtype="int32")
+        #self.modules = np.array([4,2,1,0,1])
         self.sell_list = np.zeros(7, dtype="int32")
         self.buy_list = np.zeros(7, dtype="int32")
         self.money = 750000
@@ -41,6 +44,12 @@ class Builder():
         # 3 = hall
         # 4 = garret
         self.roomCountNeeded = np.array([4, 2, 1, 0, 1])
+
+        # 0 = bauhaus, 1 = enthusiastic, 2 = unchanged, 
+        # 3 = conservative, 4 = My money, my rules
+        self.sell_personality = random.randint(1,4)
+        self.buy_personality = random.randint(0,4)
+        self.fitness = 0
 
     def check_module(self):
         components = self.inventory.copy()
@@ -67,6 +76,7 @@ class Builder():
             components = component.copy()
             modules = module.copy()
             print("Updated Modules:", modules)
+        self.inventory = components.copy()
         self.modules = modules
 
     def buildHouse(self):
@@ -112,8 +122,6 @@ class Builder():
         
         print("We have too many of:", self.sell_list)
         print("We need to buy:", self.buy_list)
-        
-        
 
     def generateSellBuyList(self):
         """Generate a sell and buy list, depending on what the Agent has in its inventory"""
@@ -146,7 +154,8 @@ class Builder():
             self.modules.copy(),
             self.sell_list.copy(),
             self.buy_list.copy(),
-            np.array([False])))
+            self.sell_personality,
+            self.buy_personality))
 
     
   
