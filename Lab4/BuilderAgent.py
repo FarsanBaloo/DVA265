@@ -15,10 +15,10 @@ class Builder():
         # 4 = toilet seat
         # 5 = tab
         # 6 = shower cabin
-        self.inventory = np.random.randint(3, size=7, dtype="int32")
+        self.inventory = np.random.randint(9, size=7, dtype="int32")
         #self.inventory = np.array( [1,0,2,1,0,0,6])
-        self.modules = np.zeros(5, dtype="int32")
-        #self.modules = np.array([4,2,1,0,1])
+        #self.modules = np.zeros(5, dtype="int32")
+        self.modules = np.array([4,2,1,0,1])
         self.sell_list = np.zeros(7, dtype="int32")
         self.buy_list = np.zeros(7, dtype="int32")
         self.money = 750000
@@ -107,7 +107,7 @@ class Builder():
         print("Inventory", self.inventory)
         
         agent_needs = self.inventory - total_need
-        self.sell_list = np.where(agent_needs > 0 , agent_needs, 0)
+        self.sell_list = np.where(agent_needs > 0, agent_needs, 0)
         self.buy_list = np.where(agent_needs < 0, np.abs(agent_needs), 0)
         
         print("We have too many of:", self.sell_list)

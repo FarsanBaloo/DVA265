@@ -4,7 +4,8 @@ from BuilderAgent import Builder
 
 
 class GA:
-    def __init__(self, numberOfIndividuals = 4, crossOverProbability = 0.6, mutationProbability = 0.03, terminateGoal = 0, maxGenerations = 100):
+    def __init__(self, numberOfIndividuals = 4, crossOverProbability = 0.6,
+                 mutationProbability = 0.03, terminateGoal = 0, maxGenerations = 100):
         self.numnberOfIndividuals = numberOfIndividuals
         self.crossOverProbability = crossOverProbability
         self.mutationProbability = mutationProbability
@@ -97,7 +98,7 @@ class GA:
         
         return self.selectedParents[0], self.selectedParents[1]
         
-    def crossover(self,parent1,parent2):
+    def crossover(self, parent1, parent2):
 
         pass
         
