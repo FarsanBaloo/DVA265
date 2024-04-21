@@ -7,7 +7,7 @@ import time
 
 class GA:
     def __init__(self, numberOfIndividuals = 4, crossOverProbability = 0.6,
-                 mutationProbability = 0.03, terminateGoal = 0, maxGenerations = 100):
+                 mutationProbability = 0.03, terminateGoal = 0, maxGenerations = 100, maxbuy = 10):
         self.numnberOfIndividuals = numberOfIndividuals
         self.crossOverProbability = crossOverProbability
         self.mutationProbability = mutationProbability
@@ -18,7 +18,8 @@ class GA:
         self.populationFitness = np.array([])
         self.IndividualsPropability = np.array([])
         self.cumulativesum = np.array([])
-        self.names = ["Rickard", "Greta", "Fredrik", "Johanna"]
+        self.names = ["Rickard", "Greta", "Fredrik", "Johanna", "Maytham",
+                      "Lisa", "Gunnar", "Sandra", "Mikael", "Gudryn"]
         self.moduleConstrains = np.array([
         [1,0,2,1,0,0,0],   # Constrains for the bed room
         [1,0,0,1,1,1,1],   # Constrains for the bathroom
@@ -26,15 +27,16 @@ class GA:
         [0,1,1,1,0,0,0],   # Constrains for the hall
         [1,0,3,1,0,0,0]    # Constrains for the garret
         ])
-        self.ComponentCost = [2500,8500,3450,75000,2995,2350,8300] 
+        self.ComponentCost = np.array([2500,8500,3450,75000,2995,2350,8300])
+        self.componentNames = ["Door", "Outside Door", "Window", "Wall Module", "Toilet Seat", "Tab", "Shower Cabin"]
         self.ModuleCost = np.sum(self.moduleConstrains * self.ComponentCost, axis = 1)
+        self.maxbuy = maxbuy
         #self.ModuleCost = np.sum(self.moduleConstrains.transpose().prod(self.ComponentCost))
         #self.ModuleCost = self.moduleConstrains.transpose()
         
 
 
     def GeneratePopulation(self):
-        
         agents = []
         for i in range(self.numnberOfIndividuals):
             agent = Builder("Agent " + self.names[i])
@@ -63,14 +65,14 @@ class GA:
         totalModuleMoneySum = np.sum(populationMonyFromComponents)
         populationMonyFromComponentsSum = np.sum(populationMonyFromComponents)
         #print(f"Total population money: {totalpopulationMoneySum}")
-        
         normalizedPopulationMoney = np.divide(totalPopulationMoney, totalpopulationMoneySum , where = totalpopulationMoneySum > 0)
-        print(f"Normalized population money: {normalizedPopulationMoney}")
         # Try to do a estamation of performence of the agents of amount of modules he have built against the agent with the most modules
         normalizedPopulationModules = np.divide(populationMoneyFromModules, totalModuleMoneySum, where = totalModuleMoneySum > 0)
-        print(f"Normalized population modules: {normalizedPopulationModules}")
         normalizedPopulationComponents = np.divide(populationMonyFromComponents, populationMonyFromComponentsSum, where = populationMonyFromComponentsSum > 0)
-        print(f"Normalized population modules: {normalizedPopulationComponents}")
+        if debug:
+            print(f"Normalized population money: {normalizedPopulationMoney}")
+            print(f"Normalized population modules: {normalizedPopulationModules}")
+            print(f"Normalized population modules: {normalizedPopulationComponents}")
         
         populationFitness = (
             normalizedPopulationMoney * 1 
@@ -79,7 +81,8 @@ class GA:
         totalFitnessPopulation = np.sum(populationFitness)
  
         normalizedPopulationFitness = np.divide(populationFitness,totalFitnessPopulation, where = totalFitnessPopulation > 0)
-        print(f"Normalized population fitness: {normalizedPopulationFitness}")
+        if debug:
+            print(f"Normalized population fitness: {normalizedPopulationFitness}")
         
         # bring in the money and sell the houses
         for i , agent in enumerate(population):
@@ -114,24 +117,91 @@ class GA:
         
         return self.selectedParents[0], self.selectedParents[1]
         
-    def crossover(self, parent1, parent2):
-        
-        
+    def BauhausShopping(self, agent):
         # behöver man ta hänsyn till vad (r) får varijera max mellan?, typ med hänsyn vad som agententerna har i sin lista!? 
         
-        r = np.random.randint(4)
+        bauhausInventory = Bauhaus.inventory.copy()
+        agentInventory = agent.inventory.copy()
+        crossoverCondition = (np.random.rand(7) < self.crossOverProbability)
+        agentMoney = agent.money
+        maxbuy = self.maxbuy
+        if debug:
+            print("="*20, "\n" + f"Crossover Condition: {crossoverCondition}")
+            print(f"{agent.name} has {agentMoney}kr of dispensible money.")
+            print(f"{agent.name}'s inventory: {agentInventory}")
+            print(f"{Bauhaus.name}'s inventory: {bauhausInventory}")
         
-        crossoverCondition1 = (np.random.rand(self.numnberOfIndividuals) < self.crossOverProbability)
-        offspring1 = np.where(crossoverCondition1, (r*parent1+(4-r) * parent2))
+        for index in len(crossoverCondition):
+            if crossoverCondition[index]:
+                if bauhausInventory[index] >= maxbuy:
+                    amount = np.random.randint(1, maxbuy+1)
+                elif bauhausInventory[index] == 0:
+                    continue
+                else:
+                    amount = np.random.randint(1, bauhausInventory[index]+1)
+                    
+                print(f"{agent.name} is trying to buy {amount} {self.componentNames[index]} for {amount*self.ComponentCost[index]}")
+                while agentMoney <= amount * self.ComponentCost[index]:
+                    if debug:
+                        print(f"Removing 1 {self.componentNames[index]} of {amount}")
+                    amount -= 1
+    
+                if amount == 0:
+                    print(f"Sorry, you can't afford to buy {self.componentNames[index]}.")
+                    continue
+                
+                agentInventory[index] += amount
+                bauhausInventory[index] -= amount
+                agentMoney -= amount * self.ComponentCost[index]
+                if debug:
+                    print(f"Updated {agent.name} Inventory: {agentInventory}")
+                    print(f"Updated Bauhaus Inventory: {bauhausInventory}")
+                    print(f"Updated Moneybag: {agentMoney}")
         
-        crossoverCondition2 = (np.random.rand(self.numnberOfIndividuals) < self.crossOverProbability)
-        offspring2 = np.where(crossoverCondition2, ((4-r) * parent1+r*parent2))
+        agent.inventory = agentInventory
+        Bauhaus.inventory = bauhausInventory
+        agent.money = agentMoney
+
+            
+            #np.where(crossoverCondition1, (r*parent1+(t-r) * parent2))
+        
+        #crossoverCondition2 = (np.random.rand(self.numnberOfIndividuals) < self.crossOverProbability)
+        #offspring2 = np.where(crossoverCondition2, ((t-r) * parent1+r*parent2))
         
         
-        return offspring1, offspring2
+        #return offspring1, offspring2
+    
+    def BauhausShoppingHybrid(self, agent):
+        
+        #agent1_buy_list = agent.inventory.copy()
+        bauhausInventory = Bauhaus.inventory.copy()
+        
+        
+        # fiskar ut alla element som är större än 0 dvs vad agent1 kan köpa och vad agent2 kan sälja
+        #agent1buy = np.where(agent1_buy_list > 0)[0]
+        bauhausSell = np.where(bauhausInventory > 0)[0]
+        
+        
+        # kollar vad max som kan köpas
+        buy = max(0, bauhausInventory[bauhausSell])
+        #maxbuy = max(agent1_buy_list[agent1buy], agent2_sell_list[agent2sell])
+        
+        
+        # kollar om minbuy är större än 0 och om det är det så köper agenten så mycket som den kan och kanske lite till
+        if buy > 0:
+            amounOfBuy = np.random.randint(self.maxbuy, buy)
+        else:
+            return
+        
+        
+        
+        
+        
+        
         
         
     def mutation(self,agent1,agent2):
+        
         pass
 
     def evaluateRanked(self,agent1,agent2,offspring1,offspring2):
@@ -202,6 +272,7 @@ if __name__ == "__main__":
     terminateGoal = 0
     maxGenerations = 1000
     strategyGenerations = 3
+    debug = True
     
     
     GA = GA(numberOfIndividuals, crossOverProbability, mutationProbability, terminateGoal , maxGenerations)

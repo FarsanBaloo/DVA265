@@ -34,7 +34,7 @@ class Builder():
         [0,1,1,1,0,0,0],   # Constrains for the hall
         [1,0,3,1,0,0,0]    # Constrains for the garret
         ])
-        self.ComponentCost = [2500,8500,3450,75000,2995,2350,8300] 
+        self.ComponentCost = np.array([2500,8500,3450,75000,2995,2350,8300])
         self.ModuleCost = np.sum(self.moduleConstrains * self.ComponentCost)
         self.totalCompNeed = np.array([8, 1, 15, 9, 2, 2, 2])
         self.ModuleNames = np.array(["bedroom", "bath room", "living room", "hall", "garret"])  
