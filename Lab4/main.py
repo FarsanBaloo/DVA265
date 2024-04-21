@@ -14,6 +14,8 @@ class GA:
         self.terminateGoal = terminateGoal
         self.countGeneration = 0
         self.maxGenerations = maxGenerations
+        self.population = []
+        self.generna = {}
         self.newpopulation = np.array([])
         self.populationFitness = np.array([])
         self.IndividualsPropability = np.array([])
@@ -31,6 +33,7 @@ class GA:
         self.componentNames = ["Door", "Outside Door", "Window", "Wall Module", "Toilet Seat", "Tab", "Shower Cabin"]
         self.ModuleCost = np.sum(self.moduleConstrains * self.ComponentCost, axis = 1)
         self.maxbuy = maxbuy
+        self.Bauhaus = Bauhaus
         #self.ModuleCost = np.sum(self.moduleConstrains.transpose().prod(self.ComponentCost))
         #self.ModuleCost = self.moduleConstrains.transpose()
         
@@ -104,24 +107,66 @@ class GA:
 
     def selectionRoulettWheel(self):
         # Spinn the roulette wheel "two" times to get two random floats each between 0 and 1
-        self.ResultRoulettSpin = np.random.rand(2)
+        print("="*20, "\n" + "SELECTION ROULETTE WHEEEL OF FORTUNE!")
+        self.ResultRoulettSpin = np.random.rand(1)
+        print(f"Roulette Result: {self.ResultRoulettSpin}")
+        genes = self.generna
+        self.calculatePropability()
+        print(f"Probability Calculation: {self.cumulativesum}")
+        self.selectedParentsElement = np.searchsorted(self.cumulativesum, self.ResultRoulettSpin)
+        print(f"Selected Element: {self.selectedParentsElement}")
+        print(f"Individual Fitness BEFORE: {self.Individualfitness}")
+        self.Individualfitness[self.selectedParentsElement] = 0
+        print(f"Individual Fitness AFTER: {self.Individualfitness}")
+        self.selectedParent1 = self.population[self.selectedParentsElement]
+        print(f"Selected Parent: {self.selectedParent1}, with name {self.selectedParent1.name}")
+
+        choice = self.selectedParent1.wantToTrade(genes)
+        print(f"Their choice is: {choice}")
+        self.calculatePropability()
+
+        checks = 0
+        """ VI FORTSÄTTER HÄR!!!! <<<<<<<<<<<<<<<<< """
+        while choice:
+            checks += 1
+            """SPIN AGAIN!!!!"""
+            self.ResultRoulettSpin = np.random.rand(1)
+            print(f"Roulette Result: {self.ResultRoulettSpin}")
+            self.selectedParentsElement = np.searchsorted(self.cumulativesum, self.ResultRoulettSpin)
+            self.selectedParent2 = self.population[self.selectedParentsElement]
+            if self.selectedParent2 == self.selectedParent1:
+                continue
+            choice2 = self.selectedParent2.wantToTrade(genes)
+            if choice2:
+                self.Individualfitness[self.selectedParentsElement] = 0
+                return self.selectedParent1, self.selectedParent2
+            elif checks == len(self.population):
+                break
+            else:
+                continue
+        self.selectedParent2 = self.Bauhaus
+
+        """selected_agents buy/sell lista <-> köp/sälj listor, för att se vad som kan bytas  
+        finns det ingenting intressant, så vill jag gå till Bauhaus.
+        Men hittar vi att andra agenter har det vi vill ha, så går vi till dem istället. """
+
+
         
         # Calculate Probability for all the inviduals
-        self.calculatePropability()
+        
         #print(f'The Individual propability:{self.IndividualsPropability}')
         #print(f'The individal Cumulative end boundary of roulett wheel :{self.cumulativesum}')
         
         # Get the indicies for the parents by searching where the roulett wheel results is less then or equal in the cumulativesum array
-        self.selectedParentsElement = np.searchsorted(self.cumulativesum, self.ResultRoulettSpin)
-        self.selectedParents = self.population[self.selectedParentsElement]
         
-        return self.selectedParents[0], self.selectedParents[1]
+        
+        return self.selectedParent1, self.selectedParent2
         
     def BauhausShopping(self, agent):
         # behöver man ta hänsyn till vad (r) får varijera max mellan?, typ med hänsyn vad som agententerna har i sin lista!? 
         
-        bauhausInventory = bauhausInventory.copy()
-        agentInventory = agentBuyList.copy()
+        bauhausInventory = self.Bauhaus.inventory.copy()
+        agentInventory = agent.inventory.copy()
         crossoverCondition = (np.random.rand(7) < self.crossOverProbability)
         agentMoney = agent.money
         maxbuy = self.maxbuy
@@ -182,14 +227,13 @@ class GA:
         
         
         # kontrollera vad agenten vill ha och vad som finns på bauhaus hyllan     
-        canBuyElement = np.where((agentInventory> 0) & (bauhausInventory > 0))[0]
+        #canBuyElement = np.where((agentInventory> 0) and (bauhausInventory > 0))[0]
         print("Agenten vill köpa:", canBuyElement)
         
         # finns det något att köpa? om inte avsluta
         if not canBuyElement.size:
             return agentInventory, bauhausInventory
             print("tomt på hyllan hos bauhas")
-
         # uppskatta max antal som kan handlas baserat på bauhaus lager
         canByAmount = np.minimum(agentInventory[canBuyElement], bauhausInventory[canBuyElement])
         print("Agenten kan köpa max antal antal baserat på bauhasus lager:", canByAmount)
@@ -241,18 +285,27 @@ class GA:
         
             # Generate Population
             self.GeneratePopulation()
+            self.Bauhaus = Bauhaus()
+            self.Bauhaus.doSomething
             #print("The Inviduals in the population are:")
             print(self.population)
+            for agent in self.population:
+                    agent.doSomething()
+                    self.generna[agent.name] = agent.generateGenome()
             self.Individualfitness = self.CalculateFitness(self.population)
-            
-            self.newpopulation = np.empty((0, self.population.shape[1]))
-              
+            #self.newpopulation = np.empty((0, self.population.shape[1]))
+
+
             while not self.terminate():
                 self.countGeneration += 1
                 print('=============================================')
                 print(f'Generation number:{self.countGeneration}')
-                            
-                while len(self.newpopulation) < self.NumberOfIndividuals:
+                self.Bauhaus.doSomething
+                for agent in self.population:
+                    agent.doSomething()
+                    self.generna[agent.name] = agent.generateGenome() 
+                self.chosenAgents = 0           
+                while len(self.population) < self.ChosenAgents:
                 
                     # Start Selection of parents using roulett wheel method
                     #print('-----------------------------------')
@@ -261,6 +314,13 @@ class GA:
                     #print(f'The selected individual element numbers from the spin of roulett wheel:\n{self.selectedParentsElement}')
                     #print(f'Parent1: {parent1}')
                     #print(f'Parent2: {parent2}')
+                    
+                    if isinstance(parent1, Bauhaus) or isinstance(parent2, Bauhaus):
+                        
+                        self.BauhausShopping()
+                        
+                        
+                        
                     
                     # Start Crossover to produce the offspring from the parents
                     offspring1,offspring2 = self.crossoverUniform(parent1, parent2)
@@ -302,14 +362,16 @@ if __name__ == "__main__":
     GA = GA(numberOfIndividuals, crossOverProbability, mutationProbability, terminateGoal , maxGenerations)
     
     
-    GA.GeneratePopulation()
-    print(GA.population)
+    #GA.GeneratePopulation()
+    #print(GA.population)
 
-    generation = 0
+    GA.GAStart()
 
-    generatedGenomes = np.zeros(29, dtype = "int32")
-    for agent in GA.population:
-        agent.doSomething()
+    #generation = 0
+
+    #generatedGenomes = np.zeros(29, dtype = "int32")
+    #for agent in GA.population:
+    #    agent.doSomething()
     #    generatedGenomes = np.vstack([generatedGenomes,agent.generateGenome()])
 
     #np.delete(generatedGenomes, 0,0)
@@ -330,10 +392,10 @@ if __name__ == "__main__":
             #print(agent.generateGenome())
     
     
-    GA.CalculateFitness(GA.population)
+    #GA.CalculateFitness(GA.population)
 
 
-    agentBauhaus = Builder("Bauhaus")
+    #agentBauhaus = Builder("Bauhaus")
 
 
 

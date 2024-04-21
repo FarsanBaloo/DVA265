@@ -51,7 +51,7 @@ def BauhausShoppingHybrid(agenten, bauhausen):
     # slumpa antal att köpa inom intervallet 1 till maxbuy
     buy_amounts = np.random.randint(1, canByAmount[toBuyElement] + 1)
     print("Agenten köper antal:", buyElement)
-
+    
     # Genomför köp
     print("Agent inventory innan köp:", agentInventory)
     agentInventory[buyElement] += buy_amounts
@@ -67,6 +67,9 @@ def BauhausShoppingHybrid(agenten, bauhausen):
 if __name__ == "__main__":
     agenten = agent()
     Bauhausen = bauhaus() 
+    print(isinstance(agenten, agent))
+    
+     
 
     agentinventory, bauhausinventory = BauhausShoppingHybrid(agenten, Bauhausen)
 

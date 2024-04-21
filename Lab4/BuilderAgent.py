@@ -49,6 +49,7 @@ class Builder():
         # 3 = conservative, 4 = My money, my rules
         self.sell_personality = random.randint(1,4)
         self.buy_personality = random.randint(0,4)
+        self.selected = False
         self.fitness = 0
 
     def check_module(self):
@@ -145,6 +146,7 @@ class Builder():
         self.buildHouse()
         #self.generateSellBuyList()
         self.testgenerateSellBuyList()
+        self.selected = False
 
     def generateGenome(self):
         base = np.array([self.money, self.houses], dtype="int32")
@@ -154,11 +156,22 @@ class Builder():
             self.modules.copy(),
             self.sell_list.copy(),
             self.buy_list.copy(),
-            self.sell_personality,
-            self.buy_personality))
+            np.array([self.sell_personality], dtype="int32"),
+            np.array([self.buy_personality], dtype="int32")))
 
-    
-  
+    def wantToTrade(self, genomes):
+        buy_list = self.buy_list.copy()
+        sell_list = self.sell_list.copy()
+        truths = 0
+        for gene in genomes:
+            if gene == self.name:
+                continue
+            if np.any(buy_list <= genomes[gene][14:21]) or np.any(sell_list <= genomes[gene][21:28]):
+                truths += 1
+        if truths > 0:
+            Choice = True
+        return Choice
+
  
 
 if __name__ == "__main__":

@@ -4,16 +4,19 @@ class Bauhaus:
     def __init__(self):
         self.name = "Bauhaus"
         """ Inventory: Door, Outside-Door, Window, Wall-Module, Toilet Seat, Tab, Shower Cabin"""
-        self.fully_stocked = np.array([10, 10, 10, 5, 10, 10, 10])
+        self.fully_stocked = np.array([10, 10, 10, 10, 10, 10, 10])
         self.max_stock = np.array([15, 15, 15, 15, 10, 15, 15])
-        self.inventory = np.random.randint(3, 10, size=7)
+        #self.inventory = np.random.randint(3, 10, size=7)
+        self.inventory = np.zeros(7)
         #self.inventory = np.array([10, 10, 10, 10, 10, 10, 10])
         self.ComponentCost = np.array([2500, 8500, 3450, 75000, 2995, 2350, 8300])
         self.fullComponentCost = np.array([2500, 8500, 3450, 75000, 2995, 2350, 8300])
-        self.Sale = False
-        self.saleChance = 0.2
-        self.money = 0
-        self.credit = 0
+        self.REA = False
+        self.REAChance = 0.2
+        self.money = 650000
+        self.BankBalance = 0
+        self.interestRate = 0.05
+        self.inkopspris = 0.8
 
     def resupply(self):
         money = self.money
@@ -23,36 +26,33 @@ class Bauhaus:
         print(f"Randomized Components to Buy {componentsToBuy}")
         componentsToBuy = np.where(componentsToBuy > 0, componentsToBuy, 0)
         print('Adjusted for Negatives', componentsToBuy)
-        # if np.any(np.all((componentsToBuy + self.inventory) > 15)):
-        #     difference = self.max_stock.copy() - componentsToBuy
-        #     print("Too many", difference)
-        #     componentsToBuy = np.where((componentsToBuy + self.inventory) > 15,
-        #                                componentsToBuy, (componentsToBuy - difference))
-        cost = int((np.sum(componentsToBuy * self.ComponentCost)) * 0.8)
+       
+        cost = int((np.sum(componentsToBuy * self.ComponentCost)) * self.inkopspris)
         print("Finalized Components to Buy:", componentsToBuy)
         print(f"Cost: {cost}")
-        money = money-cost
-        self.credit += money
+        money = money - cost
+        self.BankBalance += money
         self.money = 0
 
-    def handleCredit(self):
-        self.credit = int(self.credit * 1.05)
-        print("New Credit:", self.credit)
+    def handleBank(self):
+        self.BankBalance += int(self.BankBalance * self.interestRate)
+        print("New Bank Balance:", self.BankBalance)
 
-    def handleSales(self):
-        if np.random.rand(1) < self.saleChance:
+    def handleREA(self):
+        if np.random.rand(1) < self.REAChance:
             salePrices = np.round(self.ComponentCost.copy() * 0.75).astype(int)
             print(salePrices)
-            self.Sale = True
+            self.REA = True
             self.ComponentCost = salePrices.copy()
         else:
             self.ComponentCost = self.fullComponentCost.copy()
             self.Sale = False
 
+
     def doSomething(self):
         self.resupply()
-        self.handleCredit()
-        self.handleSales()
+        self.handleBank()
+        self.handleREA()
 
 
 
