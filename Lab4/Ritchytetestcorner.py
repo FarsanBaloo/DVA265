@@ -14,10 +14,12 @@ def BauhausShoppingHybrid(agenten, bauhausen):
     maxbuy = 10
     crossOverProbability = 0.99
     
-    bauhausInventory = bauhausen.inventory.copy()
-    print("Bauhaus inventory:", bauhausInventory)
     agentInventory = agenten.BuyList.copy()
     print("Agentens buy lista:", agentInventory)
+    
+    bauhausInventory = bauhausen.inventory.copy()
+    print("Bauhaus inventory:", bauhausInventory)
+  
     
      
     # kontrollera vad agenten vill ha och vad som finns på bauhaus hyllan     
@@ -31,16 +33,17 @@ def BauhausShoppingHybrid(agenten, bauhausen):
        
 
     # uppskatta max antal som kan handlas baserat på bauhaus lager
-    canByAmount = np.minimum(agentInventory[canBuyElement], bauhausInventory[canBuyElement])
+    canByAmount = np.min(agentInventory[canBuyElement], bauhausInventory[canBuyElement])
     print("Agenten kan köpa max antal antal baserat på bauhasus lager:", canByAmount)
     
     # begräns yterligare antal baserat på maxbuy
-    canByAmount = np.minimum(canByAmount, maxbuy)
+    canByAmount = np.min(canByAmount, maxbuy)
     print("Agenten kan köpa max antal antal baserat på begränsning av maxbuy:", canByAmount)
 
 
     # slumpa vilken vara att köpa ifrån köplistan baserat på Proben
     toBuyElement = np.random.rand(canBuyElement.size) < crossOverProbability
+    print("Agenten vill köpa element:", toBuyElement)
     print("Agenten vill köpa element:", toBuyElement)
     buyElement = canBuyElement[toBuyElement]
     print("Agenten vill köpa element:", buyElement)
