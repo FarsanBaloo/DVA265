@@ -23,7 +23,7 @@ def BauhausShoppingHybrid(agenten, bauhausen):
     
      
     # kontrollera vad agenten vill ha och vad som finns på bauhaus hyllan     
-    canBuyElement = np.where((agentInventory> 0) & (bauhausInventory > 0))[0]
+    canBuyElement = np.where((bauhausInventory > 0))[0]
     print("Agenten vill köpa:", canBuyElement)
     
     # finns det något att köpa? om inte avsluta
