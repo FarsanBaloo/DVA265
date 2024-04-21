@@ -46,17 +46,9 @@ class GA:
 
         pass
 
-    def crossover(self, agent1,agent2):
-        
-       
-        
-        r = np.random.randint(4)
-        
-        offspring1 = (r*agent1+(4-r) * agent2)
-        offspring2 = ((4-r) * agent1+r*agent2)
-        
-         
-        return offspring1, offspring2
+    def crossover(self, parent1,parent2):
+    
+     pass
 
     def fitness(self):
 

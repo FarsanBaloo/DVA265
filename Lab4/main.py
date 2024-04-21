@@ -92,9 +92,7 @@ class GA:
         
         return self.populationFitness
 
-    def Crossover(self):
-        pass
-           
+
     def calculatePropability(self):
         # Calculate each individual propability in a normalized fashion
         self.IndividualsPropability = self.Individualfitness/np.sum(self.Individualfitness)
@@ -117,7 +115,21 @@ class GA:
         return self.selectedParents[0], self.selectedParents[1]
         
     def crossover(self, parent1, parent2):
-        pass
+        
+        
+        # behöver man ta hänsyn till vad (r) får varijera max mellan?, typ med hänsyn vad som agententerna har i sin lista!? 
+        
+        r = np.random.randint(4)
+        
+        crossoverCondition1 = (np.random.rand(self.numnberOfIndividuals) < self.crossOverProbability)
+        offspring1 = np.where(crossoverCondition1, (r*parent1+(4-r) * parent2))
+        
+        crossoverCondition2 = (np.random.rand(self.numnberOfIndividuals) < self.crossOverProbability)
+        offspring2 = np.where(crossoverCondition2, ((4-r) * parent1+r*parent2))
+        
+        
+        return offspring1, offspring2
+        
         
     def mutation(self,agent1,agent2):
         pass
