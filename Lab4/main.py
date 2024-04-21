@@ -120,8 +120,8 @@ class GA:
     def BauhausShopping(self, agent):
         # behöver man ta hänsyn till vad (r) får varijera max mellan?, typ med hänsyn vad som agententerna har i sin lista!? 
         
-        bauhausInventory = Bauhaus.inventory.copy()
-        agentInventory = agent.inventory.copy()
+        bauhausInventory = bauhausInventory.copy()
+        agentInventory = agentBuyList.copy()
         crossoverCondition = (np.random.rand(7) < self.crossOverProbability)
         agentMoney = agent.money
         maxbuy = self.maxbuy
@@ -158,8 +158,8 @@ class GA:
                     print(f"Updated Bauhaus Inventory: {bauhausInventory}")
                     print(f"Updated Moneybag: {agentMoney}")
         
-        agent.inventory = agentInventory
-        Bauhaus.inventory = bauhausInventory
+        agentBuyList= agentInventory
+        bauhausInventory = bauhausInventory
         agent.money = agentMoney
 
             
@@ -171,33 +171,57 @@ class GA:
         
         #return offspring1, offspring2
     
-    def BauhausShoppingHybrid(self, agent):
+    def BauhausShoppingHybrid(agenten, bauhausen):
+        maxbuy = 10
+        crossOverProbability = 0.99
         
-        #agent1_buy_list = agent.inventory.copy()
-        bauhausInventory = Bauhaus.inventory.copy()
-        
-        
-        # fiskar ut alla element som är större än 0 dvs vad agent1 kan köpa och vad agent2 kan sälja
-        #agent1buy = np.where(agent1_buy_list > 0)[0]
-        bauhausSell = np.where(bauhausInventory > 0)[0]
-        
-        
-        # kollar vad max som kan köpas
-        buy = max(0, bauhausInventory[bauhausSell])
-        #maxbuy = max(agent1_buy_list[agent1buy], agent2_sell_list[agent2sell])
+        bauhausInventory = bauhausen.inventory.copy()
+        print("Bauhaus inventory:", bauhausInventory)
+        agentInventory = agenten.BuyList.copy()
+        print("Agentens buy lista:", agentInventory)
         
         
-        # kollar om minbuy är större än 0 och om det är det så köper agenten så mycket som den kan och kanske lite till
-        if buy > 0:
-            amounOfBuy = np.random.randint(self.maxbuy, buy)
-        else:
-            return
+        # kontrollera vad agenten vill ha och vad som finns på bauhaus hyllan     
+        canBuyElement = np.where((agentInventory> 0) & (bauhausInventory > 0))[0]
+        print("Agenten vill köpa:", canBuyElement)
         
+        # finns det något att köpa? om inte avsluta
+        if not canBuyElement.size:
+            return agentInventory, bauhausInventory
+            print("tomt på hyllan hos bauhas")
+
+        # uppskatta max antal som kan handlas baserat på bauhaus lager
+        canByAmount = np.minimum(agentInventory[canBuyElement], bauhausInventory[canBuyElement])
+        print("Agenten kan köpa max antal antal baserat på bauhasus lager:", canByAmount)
         
+        # begräns yterligare antal baserat på maxbuy
+        canByAmount = np.minimum(canByAmount, maxbuy)
+        print("Agenten kan köpa max antal antal baserat på begränsning av maxbuy:", canByAmount)
+
+
+        # slumpa vilken vara att köpa ifrån köplistan baserat på Proben
+        toBuyElement = np.random.rand(canBuyElement.size) < crossOverProbability
+        print("Agenten vill köpa element:", toBuyElement)
+        buyElement = canBuyElement[toBuyElement]
+        print("Agenten vill köpa element:", buyElement)
         
+        # slumpa antal att köpa inom intervallet 1 till maxbuy
+        buy_amounts = np.random.randint(1, canByAmount[toBuyElement] + 1)
+        print("Agenten köper antal:", buyElement)
+
+        # Genomför köp
+        print("Agent inventory innan köp:", agentInventory)
+        agentInventory[buyElement] += buy_amounts
+        print("Agent inventory efter köp:", agentInventory)
         
-        
-        
+        print("Bauhaus inventory innan köp:", bauhausInventory)
+        bauhausInventory[buyElement] -= buy_amounts
+        print("Bauhaus inventory efter köp:", bauhausInventory)
+
+        return agentInventory, bauhausInventory 
+    
+
+   
         
         
     def mutation(self,agent1,agent2):
