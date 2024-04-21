@@ -26,8 +26,9 @@ def BauhausShoppingHybrid(agenten, bauhausen):
     
     # finns det något att köpa? om inte avsluta
     if not canBuyElement.size:
-        return agentInventory, bauhausInventory
         print("tomt på hyllan hos bauhas")
+        return agentInventory, bauhausInventory
+       
 
     # uppskatta max antal som kan handlas baserat på bauhaus lager
     canByAmount = np.minimum(agentInventory[canBuyElement], bauhausInventory[canBuyElement])
