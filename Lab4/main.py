@@ -199,12 +199,6 @@ if __name__ == "__main__":
     print(GA.population)
 
     generation = 0
-<<<<<<< HEAD
-    
-    while generation < 100:
-        
-        for agent in GA.population:
-=======
 
     generatedGenomes = np.zeros(29, dtype = "int32")
     for agent in GA.population:
@@ -224,7 +218,6 @@ if __name__ == "__main__":
     #        iteration = AgentGA(generatedGenomes[index+1], generatedGenomes[1:], index, strategyGenerations)
     #        iteration.prints()
     #        action = iteration.ga_loop
->>>>>>> 8cbddc2a2b931561529cdc4cb41a3614d2f552c3
             
 
             #print(agent.generateGenome())
