@@ -10,6 +10,7 @@ class Bauhaus:
         #self.inventory = np.array([10, 10, 10, 10, 10, 10, 10])
         self.ComponentCost = np.array([2500, 8500, 3450, 75000, 2995, 2350, 8300])
         self.fullComponentCost = np.array([2500, 8500, 3450, 75000, 2995, 2350, 8300])
+        self.Sale = False
         self.saleChance = 0.2
         self.money = 0
         self.credit = 0
@@ -42,9 +43,11 @@ class Bauhaus:
         if np.random.rand(1) < self.saleChance:
             salePrices = np.round(self.ComponentCost.copy() * 0.75).astype(int)
             print(salePrices)
+            self.Sale = True
             self.ComponentCost = salePrices.copy()
         else:
             self.ComponentCost = self.fullComponentCost.copy()
+            self.Sale = False
 
     def doSomething(self):
         self.resupply()
