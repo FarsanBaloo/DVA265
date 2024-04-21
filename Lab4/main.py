@@ -183,7 +183,7 @@ if __name__ == "__main__":
     
     generation = 0
     
-    while generation < 1:
+    while generation < 100:
         
         for agent in GA.population:
             
