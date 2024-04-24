@@ -17,8 +17,8 @@ class Builder():
         # 4 = toilet seat
         # 5 = tab
         # 6 = shower cabin
-        self.inventory = np.random.randint(9, size=7, dtype="int32")
-        #self.inventory = np.zeros(7, dtype="int32")
+        #self.inventory = np.random.randint(9, size=7, dtype="int32")
+        self.inventory = np.zeros(7, dtype="int32")
         #self.inventory = np.array( [1,0,2,1,0,0,6])
         self.modules = np.zeros(5, dtype="int32")
         #self.modules = np.array([4,2,1,0,1])
@@ -43,7 +43,7 @@ class Builder():
         # 2 = living room
         # 3 = hall
         # 4 = garret
-        self.roomCountNeeded = np.array([4, 2, 1, 0, 1])
+        self.roomCountNeeded = np.array([4, 2, 1, 1, 1])
 
         # 0 = bauhaus, 1 = enthusiastic, 2 = unchanged, 
         # 3 = conservative, 4 = My money, my rules
