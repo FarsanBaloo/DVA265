@@ -4,7 +4,7 @@ class Bauhaus:
     def __init__(self):
         self.name = "Bauhaus"
         """ Inventory: Door, Outside-Door, Window, Wall-Module, Toilet Seat, Tab, Shower Cabin"""
-        self.totalCompNeed = np.array([8, 1, 15, 9, 2, 2, 2])
+        # self.totalCompNeed = np.array([8, 1, 15, 9, 2, 2, 2])
         self.fully_stocked = np.array([12, 3, 25, 9, 5, 5, 5])
         self.max_stock = np.array([18, 8, 30, 15, 10, 10, 10])
         #self.inventory = np.random.randint(3, 10, size=7)
@@ -22,15 +22,15 @@ class Bauhaus:
     def resupply(self):
         money = self.money
         difference = self.fully_stocked.copy() - self.inventory.copy()
-        print('Difference:', difference)
+        #print('Difference:', difference)
         componentsToBuy = np.random.randint(difference - 5, difference + 5, size=len(self.inventory))
-        print(f"Randomized Components to Buy {componentsToBuy}")
+        #print(f"Randomized Components to Buy {componentsToBuy}")
         componentsToBuy = np.where(componentsToBuy > 0, componentsToBuy, 0)
-        print('Adjusted for Negatives', componentsToBuy)
+        #print('Adjusted for Negatives', componentsToBuy)
        
         cost = int((np.sum(componentsToBuy * self.ComponentCost)) * self.inkopspris)
-        print("Finalized Components to Buy:", componentsToBuy)
-        print(f"Cost: {cost}")
+        #print("Finalized Components to Buy:", componentsToBuy)
+        #print(f"Cost: {cost}")
         money = money - cost
 
         self.inventory += componentsToBuy
@@ -39,7 +39,7 @@ class Bauhaus:
 
     def handleBank(self):
         self.BankBalance += int(self.BankBalance * self.interestRate)
-        print("New Bank Balance:", self.BankBalance)
+        #print("New Bank Balance:", self.BankBalance)
 
     def handleREA(self):
         if np.random.rand(1) < self.REAChance:

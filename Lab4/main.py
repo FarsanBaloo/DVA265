@@ -40,7 +40,7 @@ class GA:
     def GeneratePopulation(self):
         agents = []
         for i in range(self.numnberOfIndividuals):
-            agent = Builder("Agent " + self.names[i])
+            agent = Builder("Agent " + self.names[i], 0, debug)
             agents.append(agent)
         
         self.population = agents
@@ -89,8 +89,19 @@ class GA:
         for i , agent in enumerate(population):
             agent.money = populationMoney[i]
             agent.fitness = normalizedPopulationFitness[i]
+            if agent.houses > 0:
+                agent.total_houses += 1
+                agent.houses = 0
+                taken_time = self.countGeneration - sum(agent.generation_houses)
+                print("#######", taken_time)
+                agent.generation_houses = np.append(agent.generation_houses, taken_time)
+
+            avg_house = np.sum(agent.generation_houses)/agent.total_houses if np.sum(agent.generation_houses) > 0 else 0
+            print("#######", avg_house)
             print(f"{agent.name} has {agent.money} after selling {agent.total_houses} built houses and have now fitness {agent.fitness*100.:2f} % s/he built {agent.modules} modules")
-            agent.houses = 0
+            print(f"{agent.name} has taken {agent.generation_houses[-1]} generations to build a house! ")
+            print(f"It's an average of {avg_house:.2f}")
+            
         
         self.populationFitness = normalizedPopulationFitness
         
@@ -98,43 +109,49 @@ class GA:
 
     def calculatePropability(self, fitness):
         # Calculate each individual propability in a normalized fashion
-        print(f"Fitness: {fitness}")
+        if debug:
+            print(f"Fitness: {fitness}")
         self.IndividualsPropability = fitness/np.sum(fitness)
         # Calculate the cumulative sum of the propability
         return np.cumsum(self.IndividualsPropability)
 
     def selectionRoulettWheel(self):
         # Spinn the roulette wheel "two" times to get two random floats each between 0 and 1
-        print("="*20, "\n" + "SELECTION ROULETTE WHEEEL OF FORTUNE!")
+        
         self.ResultRoulettSpin = np.random.rand(1)
-        print(f"Roulette Result: {self.ResultRoulettSpin}")
+        if debug:
+            print("="*20, "\n" + "SELECTION ROULETTE WHEEEL OF FORTUNE!")
+            print(f"Roulette Result: {self.ResultRoulettSpin}")
         genes = self.generna
         self.cumulativesum = self.calculatePropability(self.Individualfitness.copy())
-        print(f"Probability Calculation: {self.cumulativesum}")
+        if debug:
+            print(f"Probability Calculation: {self.cumulativesum}")
         self.selectedParentsElement = np.searchsorted(self.cumulativesum, self.ResultRoulettSpin)
-        print(f"Selected Element: {self.selectedParentsElement}")
-        print(f"Individual Fitness BEFORE: {self.Individualfitness}")
+        if debug:
+            print(f"Selected Element: {self.selectedParentsElement}")
+            print(f"Individual Fitness BEFORE: {self.Individualfitness}")
         self.Individualfitness[self.selectedParentsElement] = 0
-        print(f"Individual Fitness AFTER: {self.Individualfitness}")
-        print(f"Population type: {type(self.selectedParentsElement)}")
         self.selectedParent1 = self.population[self.selectedParentsElement[0]]
-        print(f"Selected Parent: {self.selectedParent1}, with name {self.selectedParent1.name}")
-
         choice = self.selectedParent1.wantToTrade(genes)
-        print(f"Their choice is: {choice}")
+        if debug:
+            print(f"Individual Fitness AFTER: {self.Individualfitness}")
+            print(f"Population type: {type(self.selectedParentsElement)}")
+            print(f"Selected Parent: {self.selectedParent1}, with name {self.selectedParent1.name}")
+            print(f"Their choice is: {choice}")
         
 
         tempFitness = self.Individualfitness.copy()
 
         checks = 0
-        """ VI FORTSÄTTER HÄR!!!! <<<<<<<<<<<<<<<<< """
+        
         while (choice and sum(tempFitness) != 0) and self.Individualfitness[self.selectedParentsElement] != sum(self.Individualfitness):
             
             self.cumulativesum = self.calculatePropability(tempFitness)
             checks += 1
             """SPIN AGAIN!!!!"""
             self.ResultRoulettSpin = np.random.rand(1)
-            print(f"Roulette Result: {self.ResultRoulettSpin}")
+            if debug:
+                print(f"Roulette Result: {self.ResultRoulettSpin}")
             self.selectedParentsElement = np.searchsorted(self.cumulativesum, self.ResultRoulettSpin)
             self.selectedParent2 = self.population[self.selectedParentsElement[0]]
 
@@ -142,10 +159,10 @@ class GA:
                 continue
             choice2 = self.selectedParent2.wantToTrade(genes)
 
-            if choice2:
+            if choice2 and (sum(np.minimum(self.selectedParent1.buy_list, self.selectedParent2.sell_list)) > 0 \
+                    or sum(np.minimum(self.selectedParent1.sell_list, self.selectedParent2.buy_list)) > 0):
                 self.Individualfitness[self.selectedParentsElement] = 0
                 return self.selectedParent1, self.selectedParent2
-            
             else:
                 tempFitness[self.selectedParentsElement] = 0
                 continue
@@ -176,9 +193,10 @@ class GA:
         agentNeed = agent.buy_list.copy()
         crossoverCondition = (np.random.rand(7) < self.crossOverProbability)
         agentMoney = agent.money
-        maxbuy = np.array(np.round(agentNeed*0.55), dtype="int32")                    # How many of each pryl you can buy maximum
+        maxbuy = np.array(np.round(agentNeed*3), dtype="int32")                    # How many of each pryl you can buy maximum
         bauhausMoney = 0
-        print(f"MAXBUY -> {maxbuy}")
+        if debug:
+            print(f"MAXBUY -> {maxbuy}")
         if debug:
             print("="*20, "\n" + f"Crossover Condition: {crossoverCondition}")
             print(f"{agent.name} has {agentMoney}kr of dispensible money.")
@@ -189,22 +207,25 @@ class GA:
         for index, condition in enumerate(crossoverCondition):
             if condition:
                 if bauhausInventory[index] >= maxbuy[index]:
-                    print("MAXBUY INDEX", maxbuy[index])
+                    if debug:
+                        print("MAXBUY INDEX", maxbuy[index])
                     amount = np.random.randint(1, maxbuy[index]+2)
                 elif bauhausInventory[index] <= 0:
                     continue
                 else:
-                    print("BAUHAUS INDEX", bauhausInventory[index])
+                    if debug:
+                        print("BAUHAUS INDEX", bauhausInventory[index])
                     amount = np.random.randint(1, bauhausInventory[index]+1)
-                    
-                print(f"{agent.name} is trying to buy {amount} {self.componentNames[index]} for {amount*self.ComponentCost[index]}")
+                if debug:
+                    print(f"{agent.name} is trying to buy {amount} {self.componentNames[index]} for {amount*self.ComponentCost[index]}")
                 while agentMoney <= amount * self.ComponentCost[index]:
                     if debug:
                         print(f"Removing 1 {self.componentNames[index]} of {amount}")
                     amount -= 1
     
                 if amount == 0:
-                    print(f"Sorry, you can't afford to buy {self.componentNames[index]}.")
+                    if debug:
+                        print(f"Sorry, you can't afford to buy {self.componentNames[index]}.")
                     continue
                 
                 agentInventory[index] += amount
@@ -245,7 +266,8 @@ class GA:
         return offspring1, offspring2
     
     def Trade(self, agent1, agent2):
-        print(f"{agent1.name} and {agent2.name} is meeting in the village square to trade! Commence battle music.")
+        if debug:
+            print(f"{agent1.name} and {agent2.name} is meeting in the village square to trade! Commence battle music.")
         
         agent1_sell = agent1.sell_list.copy()
         agent1_buy = agent1.buy_list.copy()
@@ -257,13 +279,14 @@ class GA:
         agent2_money = agent2.money
 
         maxtrade = np.minimum(agent1_buy, agent2_sell)
-        print(f"{agent1.name} Vill köpa {maxtrade} av {agent2.name}")
-        
         maxtrade2 = np.minimum(agent2_buy, agent1_sell)
-        print(f"{agent2.name} Vill köpa {maxtrade2} av {agent1.name}")
+        if debug:
+            print(f"{agent1.name} Vill köpa {maxtrade} av {agent2.name}")
+            print(f"{agent2.name} Vill köpa {maxtrade2} av {agent1.name}")
         price_diff = sum(maxtrade * self.ComponentCost) - sum(maxtrade2 * self.ComponentCost)
-        print(f"{agent1.name} Försöker byta: {maxtrade} och betalar {agent2.name} {price_diff}kr.")
-        print(f"{agent2.name} Försöker byta: {maxtrade2} och betalar {agent1.name} {-price_diff}kr.")
+        if debug:
+            print(f"{agent1.name} Försöker byta: {maxtrade} och betalar {agent2.name} {price_diff}kr.")
+            print(f"{agent2.name} Försöker byta: {maxtrade2} och betalar {agent1.name} {-price_diff}kr.")
         
         while sum(maxtrade) > 0 or sum(maxtrade2) > 0:
             if (agent1_money >= price_diff) or (agent2_money) >= (-price_diff):
@@ -271,56 +294,63 @@ class GA:
                 agent2_inventory = agent2_inventory + maxtrade2 - maxtrade
                 agent1_money -= price_diff
                 agent2_money += price_diff
-                print(f"{agent1.name} köper {maxtrade} från {agent2.name} för {price_diff}kr.")
-                print(f"{agent2.name} köper {maxtrade2} från {agent1.name} för {-price_diff}kr.")
+                if debug:
+                    print(f"{agent1.name} köper {maxtrade} från {agent2.name} för {price_diff}kr.")
+                    print(f"{agent2.name} köper {maxtrade2} från {agent1.name} för {-price_diff}kr.")
                 maxtrade = np.zeros(7)
                 maxtrade2 = np.zeros(7)
                 print("Trade was perfected!")
        
             elif sum(maxtrade > 0) and (agent1_money < price_diff):
-                print(f"{agent1.name} har inte råd att köpa {maxtrade} från {agent2.name}.")
+                if debug:
+                    print(f"{agent1.name} har inte råd att köpa {maxtrade} från {agent2.name}.")
                 elements = np.where(maxtrade != 0)[0]
                 maxtrade[elements[0]] -= 1
                 price_diff = sum(maxtrade * self.ComponentCost) - sum(maxtrade2 * self.ComponentCost)
-                print(f"Ångrar sig lägger tillbaka 1 komponent")
+                if debug:
+                    print(f"Ångrar sig lägger tillbaka 1 komponent")
 
             elif sum(maxtrade2 > 0) and (agent2_money < (-price_diff)):
                 print(f"{agent2.name} har inte råd att köpa {maxtrade2} från {agent1.name}.")
                 elements = np.where(maxtrade2 != 0)[0]
                 maxtrade2[elements[0]] -= 1
                 price_diff = sum(maxtrade * self.ComponentCost) - sum(maxtrade2 * self.ComponentCost)
-        print(f"Inv differences: {agent1.name}: {agent1.inventory} BEFORE")
-        print(f"Inv differences: {agent2.name}: {agent2.inventory} BEFORE")
+        if debug:
+            print(f"Inv differences: {agent1.name}: {agent1.inventory} BEFORE")
+            print(f"Inv differences: {agent2.name}: {agent2.inventory} BEFORE")
         agent1.inventory = agent1_inventory
         agent2.inventory = agent2_inventory
-        print(f"Inv differences: {agent1.name}: {agent1.inventory} AFTER")
-        print(f"Inv differences: {agent2.name}: {agent2.inventory} AFTER")
-        print(f"Money differences: {agent1.name}: {agent1.money} BEFORE")
-        print(f"Money differences: {agent2.name}: {agent2.money} BEFORE")
+        if debug:
+            print(f"Inv differences: {agent1.name}: {agent1.inventory} AFTER")
+            print(f"Inv differences: {agent2.name}: {agent2.inventory} AFTER")
+            print(f"Money differences: {agent1.name}: {agent1.money} BEFORE")
+            print(f"Money differences: {agent2.name}: {agent2.money} BEFORE")
         agent1.money = agent1_money
         agent2.money = agent2_money
-        print(f"Money differences: {agent1.name}: {agent1.money} AFTER")
-        print(f"Money differences: {agent2.name}: {agent2.money} AFTER")
+        if debug:
+            print(f"Money differences: {agent1.name}: {agent1.money} AFTER")
+            print(f"Money differences: {agent2.name}: {agent2.money} AFTER")
 
         return agent1, agent2   
-        
-
         
     def mutation(self,offspring):
         # Offspring1 generate mutation condition array True/False for each gen depending on the mutation probability vectrorized
         mutationCondition = (np.random.rand(8) < self.mutationProbability)
-        print(f'The mutation condition for offspring based of probability: {mutationCondition}') 
+        if debug:
+            print(f'The mutation condition for offspring based of probability: {mutationCondition}') 
         if mutationCondition[7]:
-                print(f"Offspring money before Mutation: {offspring.money}")
+                if debug:
+                    print(f"Offspring money before Mutation: {offspring.money}")
                 offspring.money = np.round(((100+np.random.randint(-5, 5))/100)*offspring.money if offspring.money > 0 else 0)
-                print(f"Offspring money after Mutation: {offspring.money}")
+                if debug:
+                    print(f"Offspring money after Mutation: {offspring.money}")
         mutationCondition = mutationCondition[:7]
-        
-        print(f'Offspring before mutation: {offspring.inventory}')
-        offspring.inventory = np.where(mutationCondition, offspring.inventory + np.random.randint(-2, 2), offspring.inventory)
+        if debug:
+            print(f'Offspring before mutation: {offspring.inventory}')
+        offspring.inventory = np.where(mutationCondition, offspring.inventory + np.random.randint(-1, 1), offspring.inventory)
         offspring.inventory = np.where(offspring.inventory < 0, 0, offspring.inventory)
-        
-        print(f'Offspring after mutation: {offspring.inventory}')
+        if debug:
+            print(f'Offspring after mutation: {offspring.inventory}')
         return offspring
           
     def evaluateRanked(self,agent1,agent2,offspring1,offspring2):
@@ -364,12 +394,7 @@ class GA:
                 self.newpopulation = []           
                 while len(self.population) > len(self.newpopulation):
                     # Start Selection of parents using roulett wheel method
-                    #print('-----------------------------------')
                     parent1,parent2 = self.selectionRoulettWheel()
-                    #print(f'Result of roulett wheel spin during selection :{self.ResultRoulettSpin}')
-                    #print(f'The selected individual element numbers from the spin of roulett wheel:\n{self.selectedParentsElement}')
-                    #print(f'Parent1: {parent1}')
-                    #print(f'Parent2: {parent2}')
                     
                     if isinstance(parent2, Bauhaus):
                         parent1 = self.BauhausShopping(parent1)
@@ -378,17 +403,6 @@ class GA:
                     else:
                         # Start to "Trade" / Crossover to produce the offspring from the parents
                         offspring1,offspring2 = self.Trade(parent1, parent2)
-                        #print(f'Offspring1 after crossover: {offspring1}')
-                        #print(f'Offspring2 after crossover: {offspring2}')
-                    
-                        # Start mutate the offsprings
-                        
-                        #print(f'Offspring1 after mutation: {offspring1}')
-                        #print(f'Offspring2 after mutation: {offspring2}')
-    
-                        #individual1,individual2 = self.evaluateRanked(parent1,parent2,offspring1,offspring2)
-                        #print(f'The best ranked individual in the family is: {individual1}')
-                        #print(f'The second best ranked individual in the family is: {individual2}')
                         self.newpopulation.append(self.mutation(offspring1))
                         self.newpopulation.append(self.mutation(offspring2))
 
@@ -400,17 +414,14 @@ class GA:
                  
 
 
-
-
-
 if __name__ == "__main__":
-    numberOfIndividuals = 4
+    numberOfIndividuals = 10
     crossOverProbability = 0.6
-    mutationProbability = 0.03
+    mutationProbability = 0.0
     terminateGoal = 0
-    maxGenerations = 50
+    maxGenerations = 500
     strategyGenerations = 3
-    debug = True
+    debug = False
     
     
     GA = GA(numberOfIndividuals, crossOverProbability, mutationProbability, terminateGoal , maxGenerations)
@@ -450,9 +461,6 @@ if __name__ == "__main__":
 
 
     #agentBauhaus = Builder("Bauhaus")
-
-
-
 
 
 
