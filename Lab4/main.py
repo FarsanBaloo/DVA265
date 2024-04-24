@@ -89,7 +89,7 @@ class GA:
         for i , agent in enumerate(population):
             agent.money = populationMoney[i]
             agent.fitness = normalizedPopulationFitness[i]
-            print(f"{agent.name} has {agent.money} after selling {agent.houses} built houses and have now fitness {agent.fitness*100.:2f} % s/he built {agent.modules} modules")
+            print(f"{agent.name} has {agent.money} after selling {agent.total_houses} built houses and have now fitness {agent.fitness*100.:2f} % s/he built {agent.modules} modules")
             agent.houses = 0
         
         self.populationFitness = normalizedPopulationFitness
@@ -173,22 +173,27 @@ class GA:
         
         bauhausInventory = self.Bauhaus.inventory.copy()
         agentInventory = agent.inventory.copy()
+        agentNeed = agent.buy_list.copy()
         crossoverCondition = (np.random.rand(7) < self.crossOverProbability)
         agentMoney = agent.money
-        maxbuy = self.maxbuy                    # How many of each pryl you can buy maximum
+        maxbuy = np.array(np.round(agentNeed*0.55), dtype="int32")                    # How many of each pryl you can buy maximum
+        print(f"MAXBUY -> {maxbuy}")
         if debug:
             print("="*20, "\n" + f"Crossover Condition: {crossoverCondition}")
             print(f"{agent.name} has {agentMoney}kr of dispensible money.")
             print(f"{agent.name}'s inventory: {agentInventory}")
-            print(f"{Bauhaus.name}'s inventory: {bauhausInventory}")
+            print(f"{self.Bauhaus.name}'s inventory: {bauhausInventory}")
+            print(f"CrossoverCondition: {crossoverCondition}")
         
-        for index in len(crossoverCondition):
-            if crossoverCondition[index]:
-                if bauhausInventory[index] >= maxbuy:
-                    amount = np.random.randint(1, maxbuy+1)
-                elif bauhausInventory[index] == 0:
+        for index, condition in enumerate(crossoverCondition):
+            if condition:
+                if bauhausInventory[index] >= maxbuy[index]:
+                    print("MAXBUY INDEX", maxbuy[index])
+                    amount = np.random.randint(1, maxbuy[index]+2)
+                elif bauhausInventory[index] <= 0:
                     continue
                 else:
+                    print("BAUHAUS INDEX", bauhausInventory[index])
                     amount = np.random.randint(1, bauhausInventory[index]+1)
                     
                 print(f"{agent.name} is trying to buy {amount} {self.componentNames[index]} for {amount*self.ComponentCost[index]}")
@@ -211,7 +216,8 @@ class GA:
         
 
         agentBuyList= agentInventory
-        bauhausInventory = bauhausInventory
+        self.Bauhaus.inventory = bauhausInventory
+        agent.inventory = agentInventory
         agent.money = agentMoney
 
         
@@ -305,7 +311,7 @@ class GA:
         print(f'The mutation condition for offspring based of probability: {mutationCondition}') 
         if mutationCondition[7]:
                 print(f"Offspring money before Mutation: {offspring.money}")
-                offspring.money = ((100+np.random.randint(-5, 5))/100)*offspring.money if offspring.money > 0 else 0
+                offspring.money = np.round(((100+np.random.randint(-5, 5))/100)*offspring.money if offspring.money > 0 else 0)
                 print(f"Offspring money after Mutation: {offspring.money}")
         mutationCondition = mutationCondition[:7]
         
@@ -336,7 +342,7 @@ class GA:
             # Generate Population
             self.GeneratePopulation()
             self.Bauhaus = Bauhaus()
-            self.Bauhaus.doSomething
+            self.Bauhaus.doSomething()
             #print("The Inviduals in the population are:")
             print(self.population)
             for agent in self.population:
@@ -350,7 +356,7 @@ class GA:
                 self.countGeneration += 1
                 print('=============================================')
                 print(f'Generation number:{self.countGeneration}')
-                self.Bauhaus.doSomething
+                self.Bauhaus.doSomething()
                 for agent in self.population:
                     agent.doSomething()
                     self.generna[agent.name] = agent.generateGenome() 
@@ -365,8 +371,8 @@ class GA:
                     #print(f'Parent2: {parent2}')
                     
                     if isinstance(parent2, Bauhaus):
-                        self.newpopulation.append(self.BauhausShopping(parent1))
-
+                        parent1 = self.BauhausShopping(parent1)
+                        self.newpopulation.append(self.mutation(parent1))
                             
                     else:
                         # Start to "Trade" / Crossover to produce the offspring from the parents
@@ -382,16 +388,10 @@ class GA:
                         #individual1,individual2 = self.evaluateRanked(parent1,parent2,offspring1,offspring2)
                         #print(f'The best ranked individual in the family is: {individual1}')
                         #print(f'The second best ranked individual in the family is: {individual2}')
-                    
-                        self.newpopulation.append(offspring1)
-                        self.newpopulation.append(offspring2)
-                    for index, offspring in enumerate(self.newpopulation):
+                        self.newpopulation.append(self.mutation(offspring1))
+                        self.newpopulation.append(self.mutation(offspring2))
 
-                        """ Itty bitty little loop, 
-                        doing loop things. <3<3<3 """
 
-                        self.newpopulation[index] = self.mutation(offspring)
-                  
                     #print('-----------------------------------')
                 self.Individualfitness = self.CalculateFitness(self.newpopulation)
                 print(f'The Best fitness of a individual in the population: {np.max(self.populationFitness)} %')
@@ -407,7 +407,7 @@ if __name__ == "__main__":
     crossOverProbability = 0.6
     mutationProbability = 0.03
     terminateGoal = 0
-    maxGenerations = 1
+    maxGenerations = 50
     strategyGenerations = 3
     debug = True
     

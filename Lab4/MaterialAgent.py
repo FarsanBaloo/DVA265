@@ -31,6 +31,8 @@ class Bauhaus:
         print("Finalized Components to Buy:", componentsToBuy)
         print(f"Cost: {cost}")
         money = money - cost
+
+        self.inventory += componentsToBuy
         self.BankBalance += money
         self.money = 0
 

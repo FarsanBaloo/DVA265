@@ -24,8 +24,9 @@ class Builder():
         #self.modules = np.array([4,2,1,0,1])
         self.sell_list = np.zeros(7, dtype="int32")
         self.buy_list = np.zeros(7, dtype="int32")
-        self.money = 750000
+        self.money = 1000000
         self.houses = 0
+        self.total_houses = 0
         self.fitness = 0
         self.moduleConstrains = np.array([
         [1,0,2,1,0,0,0],   # Constrains for the bed room
@@ -108,36 +109,46 @@ class Builder():
     
     def testgenerateSellBuyList(self):
         """Generate a sell and buy list, depending on what the Agent has in its inventory"""
+        
+        print("="*20)
+        print(f"==={self.name}===")
+        print(f"==GENERATE BUY / SELL LIST==")
+
         room_need = self.roomCountNeeded - self.modules
         print("Room need:", room_need)
         
         TransponatmoduleConstrains = self.moduleConstrains.transpose()
         total_need = np.dot(TransponatmoduleConstrains, room_need)
         
-        print("Total need", total_need)
-        print("Inventory", self.inventory)
+        print("=== Total need", total_need)
+        print("=== Inventory", self.inventory)
         
         agent_needs = self.inventory - total_need
         self.sell_list = np.where(agent_needs > 0, agent_needs, 0)
         self.buy_list = np.where(agent_needs < 0, np.abs(agent_needs), 0)
         
-        print("We have too many of:", self.sell_list)
-        print("We need to buy:", self.buy_list)
+        print("=== We have too many of:", self.sell_list)
+        print("=== We need to buy:", self.buy_list)
 
     def generateSellBuyList(self):
         """Generate a sell and buy list, depending on what the Agent has in its inventory"""
+        
+        print("="*20)
+        print(f"==={self.name}===")
+        print(f"==GENERATE BUY / SELL LIST==")
+        
         room_need = self.roomCountNeeded - self.modules
         print("Room need:", room_need)
         total_need = np.zeros(7)
         for i, a in enumerate(self.moduleConstrains):
             total_need += a * room_need[i]
         print("Total need", total_need)
-        print("Inventory", self.inventory)
+        print("==== Inventory", self.inventory)
         agent_needs = self.inventory - total_need
         sell_list = [x if x >= 0 else 0 for x in agent_needs]
         buy_list = [-x if x <= 0 else 0 for x in agent_needs]
-        print("We have too many of:", sell_list)
-        print("We need to buy:", buy_list)
+        print("=== We have too many of:", sell_list)
+        print("=== We need to buy:", buy_list)
         self.buy_list = np.array(buy_list, dtype="int32")
         self.sell_list = np.array(sell_list, dtype="int32")
 
@@ -160,13 +171,21 @@ class Builder():
             np.array([self.buy_personality], dtype="int32")))
 
     def wantToTrade(self, genomes):
+        print("="*20)
+        print("==WANT TO TRADE==")
         buy_list = self.buy_list.copy()
+        print(f"{self.name}'s buy list = {self.buy_list}")
         sell_list = self.sell_list.copy()
+        print(f"{self.name}'s sell list = {self.sell_list}")
         truths = 0
+        Choice = False
         for gene in genomes:
+            #print(f"{buy_list} <= {genomes[gene][14:21]}")
+            #print(f"{sell_list} <= {genomes[gene][21:28]}")
             if gene == self.name:
                 continue
-            if np.any(buy_list <= genomes[gene][14:21]) or np.any(sell_list <= genomes[gene][21:28]):
+            if sum(np.minimum(buy_list, genomes[gene][14:21])) > 0 or sum(np.minimum(sell_list, genomes[gene][21:28])) > 0:
+            #if np.any(np.all(buy_list <= genomes[gene][14:21])) or np.any(np.all(sell_list <= genomes[gene][21:28])):
                 truths += 1
         if truths > 0:
             Choice = True
