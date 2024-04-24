@@ -16,7 +16,7 @@ class GA:
         self.maxGenerations = maxGenerations
         self.population = []
         self.generna = {}
-        self.newpopulation = np.array([])
+        self.newpopulation = []
         self.populationFitness = np.array([])
         self.IndividualsPropability = np.array([])
         self.cumulativesum = np.array([])
@@ -207,76 +207,56 @@ class GA:
         bauhausInventory = bauhausInventory
         agent.money = agentMoney
 
+        
+        return agent
+
+    def Trade(agent1, agent2):
+        crossOverProbability = 0.6
+        
+        agent1Inventory = agent1.inventory.copy()    
+        agent2Inventory = agent2.inventory.copy()
+        print(f"Agent 1 inventory: {agent1Inventory}")
+        print(f"Agent 2 inventory: {agent2Inventory}")
+        
+        
+        # generate crossover condition array True/False for each  gen depending on the crossover probability vectorized
+        crossoverCondition = (np.random.rand(7) < crossOverProbability)
+        print(f'crossover condition: {crossoverCondition}')
+
+        # Produce the Offsprings and select each gen based on parent 1 or 2 depending on crossoverCondition vectorized
+        offspring1 = np.where(crossoverCondition, agent2Inventory, agent1Inventory)
+        offspring2 = np.where(crossoverCondition, agent1Inventory, agent2Inventory)
+        
+        print(f"Offspring 1: {offspring1}") 
+        print(f"Offspring 2: {offspring2}")
             
-            #np.where(crossoverCondition1, (r*parent1+(t-r) * parent2))
         
-        #crossoverCondition2 = (np.random.rand(self.numnberOfIndividuals) < self.crossOverProbability)
-        #offspring2 = np.where(crossoverCondition2, ((t-r) * parent1+r*parent2))
-        
-        
-        #return offspring1, offspring2
-    
-    def BauhausShoppingHybrid(agenten, bauhausen):
-        maxbuy = 10
-        crossOverProbability = 0.99
-        
-        bauhausInventory = bauhausen.inventory.copy()
-        print("Bauhaus inventory:", bauhausInventory)
-        agentInventory = agenten.BuyList.copy()
-        print("Agentens buy lista:", agentInventory)
-        
-        
-        # kontrollera vad agenten vill ha och vad som finns på bauhaus hyllan     
-        #canBuyElement = np.where((agentInventory> 0) and (bauhausInventory > 0))[0]
-        print("Agenten vill köpa:", canBuyElement)
-        
-        # finns det något att köpa? om inte avsluta
-        if not canBuyElement.size:
-            return agentInventory, bauhausInventory
-            print("tomt på hyllan hos bauhas")
-        # uppskatta max antal som kan handlas baserat på bauhaus lager
-        canByAmount = np.minimum(agentInventory[canBuyElement], bauhausInventory[canBuyElement])
-        print("Agenten kan köpa max antal antal baserat på bauhasus lager:", canByAmount)
-        
-        # begräns yterligare antal baserat på maxbuy
-        canByAmount = np.minimum(canByAmount, maxbuy)
-        print("Agenten kan köpa max antal antal baserat på begränsning av maxbuy:", canByAmount)
 
-
-        # slumpa vilken vara att köpa ifrån köplistan baserat på Proben
-        toBuyElement = np.random.rand(canBuyElement.size) < crossOverProbability
-        print("Agenten vill köpa element:", toBuyElement)
-        buyElement = canBuyElement[toBuyElement]
-        print("Agenten vill köpa element:", buyElement)
+        return offspring1, offspring2
         
-        # slumpa antal att köpa inom intervallet 1 till maxbuy
-        buy_amounts = np.random.randint(1, canByAmount[toBuyElement] + 1)
-        print("Agenten köper antal:", buyElement)
-
-        # Genomför köp
-        print("Agent inventory innan köp:", agentInventory)
-        agentInventory[buyElement] += buy_amounts
-        print("Agent inventory efter köp:", agentInventory)
+    def mutation(self,offspring1,offspring2):
+        # Offspring1 generate mutation condition array True/False for each gen depending on the mutation probability vectrorized
+        mutationCondition1 = (np.random.rand(self.NumberOfGens) < self.mutationProbability)
+        #print(f'The mutation condition for offspring1 based of probability: {mutationCondition1}') 
+        offspring1 = np.where(mutationCondition1, 1 - offspring1, offspring1)
         
-        print("Bauhaus inventory innan köp:", bauhausInventory)
-        bauhausInventory[buyElement] -= buy_amounts
-        print("Bauhaus inventory efter köp:", bauhausInventory)
-
-        return agentInventory, bauhausInventory 
-    
-
-   
+        # Offspring2 generate mutation condition array True/False for each gen depending on the mutation probability vectrorized
+        mutationCondition2 = (np.random.rand(self.NumberOfGens) < self.mutationProbability)
+        #print(f'The mutation condition for offspring2 based of probability: {mutationCondition2}')
+        offspring2 = np.where(mutationCondition2, 1 - offspring2, offspring2)
         
-        
-    def mutation(self,agent1,agent2):
-        
-        pass
-
+        return offspring1, offspring2
+          
     def evaluateRanked(self,agent1,agent2,offspring1,offspring2):
-        pass    
+        individuals = [agent1,agent2,offspring1,offspring2]
+        individualsFitness = self.CalculateFitness(individuals)
+        elementsortedbyfitness = np.argsort(-individualsFitness)
+        
+        return individuals[elementsortedbyfitness[0]],individuals[elementsortedbyfitness[1]]
       
     def updatePopulation(self):
-        pass
+            self.population = self.newpopulation.copy()
+            self.newpopulation = []
 
     def terminate(self):
         pass
@@ -319,29 +299,26 @@ class GA:
                         
                         self.BauhausShopping()
                         
-                        
-                        
+                    else:
+                        # Start to "Trade" / Crossover to produce the offspring from the parents
+                        offspring1,offspring2 = self.Trade(parent1, parent2)
+                        #print(f'Offspring1 after crossover: {offspring1}')
+                        #print(f'Offspring2 after crossover: {offspring2}')
                     
-                    # Start Crossover to produce the offspring from the parents
-                    offspring1,offspring2 = self.crossoverUniform(parent1, parent2)
-                    #print(f'Offspring1 after crossover: {offspring1}')
-                    #print(f'Offspring2 after crossover: {offspring2}')
+                        # Start mutate the offsprings
+                        offspring1, offspring2 = self.mutation(offspring1, offspring2)
+                        #print(f'Offspring1 after mutation: {offspring1}')
+                        #print(f'Offspring2 after mutation: {offspring2}')
+    
+                        individual1,individual2 = self.evaluateRanked(parent1,parent2,offspring1,offspring2)
+                        #print(f'The best ranked individual in the family is: {individual1}')
+                        #print(f'The second best ranked individual in the family is: {individual2}')
                     
-                    # Start mutate the offsprings
-                    offspring1, offspring2 = self.mutation(offspring1, offspring2)
-                    #print(f'Offspring1 after mutation: {offspring1}')
-                    #print(f'Offspring2 after mutation: {offspring2}')
- 
-                    individual1,individual2 = self.evaluateRanked(parent1,parent2,offspring1,offspring2)
-                    #print(f'The best ranked individual in the family is: {individual1}')
-                    #print(f'The second best ranked individual in the family is: {individual2}')
-                    
-                    self.newpopulation = np.vstack((self.newpopulation,individual1))
-                    self.newpopulation = np.vstack((self.newpopulation,individual2))
+                        self.newpopulation.append(individual1,individual2)
+                  
                     #print('-----------------------------------')
                 self.Individualfitness = self.CalculateFitness(self.newpopulation)
-                #print(f'The Individuals fitness in the population:{self.Individualfitness}')
-                print(f'The Best fitness of a individual in the population: {np.max(self.Individualfitness)} %')
+                print(f'The Best fitness of a individual in the population: {np.max(self.populationFitness)} %')
                 self.updatePopulation()       
                  
 
