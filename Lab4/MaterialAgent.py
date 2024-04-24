@@ -4,8 +4,9 @@ class Bauhaus:
     def __init__(self):
         self.name = "Bauhaus"
         """ Inventory: Door, Outside-Door, Window, Wall-Module, Toilet Seat, Tab, Shower Cabin"""
-        self.fully_stocked = np.array([10, 10, 10, 10, 10, 10, 10])
-        self.max_stock = np.array([15, 15, 15, 15, 10, 15, 15])
+        self.totalCompNeed = np.array([8, 1, 15, 9, 2, 2, 2])
+        self.fully_stocked = np.array([12, 3, 25, 9, 5, 5, 5])
+        self.max_stock = np.array([18, 8, 30, 15, 10, 10, 10])
         #self.inventory = np.random.randint(3, 10, size=7)
         self.inventory = np.zeros(7)
         #self.inventory = np.array([10, 10, 10, 10, 10, 10, 10])
@@ -16,7 +17,7 @@ class Bauhaus:
         self.money = 650000
         self.BankBalance = 0
         self.interestRate = 0.05
-        self.inkopspris = 0.8
+        self.inkopspris = 0.5
 
     def resupply(self):
         money = self.money

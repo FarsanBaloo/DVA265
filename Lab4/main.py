@@ -177,6 +177,7 @@ class GA:
         crossoverCondition = (np.random.rand(7) < self.crossOverProbability)
         agentMoney = agent.money
         maxbuy = np.array(np.round(agentNeed*0.55), dtype="int32")                    # How many of each pryl you can buy maximum
+        bauhausMoney = 0
         print(f"MAXBUY -> {maxbuy}")
         if debug:
             print("="*20, "\n" + f"Crossover Condition: {crossoverCondition}")
@@ -209,17 +210,17 @@ class GA:
                 agentInventory[index] += amount
                 bauhausInventory[index] -= amount
                 agentMoney -= amount * self.ComponentCost[index]
+                bauhausMoney += amount * self.ComponentCost[index]
                 if debug:
                     print(f"Updated {agent.name} Inventory: {agentInventory}")
                     print(f"Updated Bauhaus Inventory: {bauhausInventory}")
                     print(f"Updated Moneybag: {agentMoney}")
-        
 
         agentBuyList= agentInventory
         self.Bauhaus.inventory = bauhausInventory
         agent.inventory = agentInventory
         agent.money = agentMoney
-
+        self.Bauhaus.money = bauhausMoney
         
         return agent
 
