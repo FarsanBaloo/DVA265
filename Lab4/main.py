@@ -37,8 +37,6 @@ class GA:
         #self.ModuleCost = np.sum(self.moduleConstrains.transpose().prod(self.ComponentCost))
         #self.ModuleCost = self.moduleConstrains.transpose()
         
-
-
     def GeneratePopulation(self):
         agents = []
         for i in range(self.numnberOfIndividuals):
@@ -97,7 +95,6 @@ class GA:
         self.populationFitness = normalizedPopulationFitness
         
         return self.populationFitness
-
 
     def calculatePropability(self):
         # Calculate each individual propability in a normalized fashion
@@ -210,22 +207,18 @@ class GA:
         
         return agent
 
-    def Trade(agent1, agent2):
-        crossOverProbability = 0.6
+    def Trade(self,agent1, agent2):
         
-        agent1Inventory = agent1.inventory.copy()    
-        agent2Inventory = agent2.inventory.copy()
-        print(f"Agent 1 inventory: {agent1Inventory}")
-        print(f"Agent 2 inventory: {agent2Inventory}")
-        
+        print(f"Agent 1 inventory: {agent1.inventory}")
+        print(f"Agent 2 inventory: {agent2.inventory}")
         
         # generate crossover condition array True/False for each  gen depending on the crossover probability vectorized
-        crossoverCondition = (np.random.rand(7) < crossOverProbability)
+        crossoverCondition = (np.random.rand(7) < self.crossOverProbability)
         print(f'crossover condition: {crossoverCondition}')
 
         # Produce the Offsprings and select each gen based on parent 1 or 2 depending on crossoverCondition vectorized
-        offspring1 = np.where(crossoverCondition, agent2Inventory, agent1Inventory)
-        offspring2 = np.where(crossoverCondition, agent1Inventory, agent2Inventory)
+        offspring1 = np.where(crossoverCondition, agent2.inventory, agent1.inventory)
+        offspring2 = np.where(crossoverCondition, agent1.inventory, agent2.inventory)
         
         print(f"Offspring 1: {offspring1}") 
         print(f"Offspring 2: {offspring2}")
@@ -236,14 +229,14 @@ class GA:
         
     def mutation(self,offspring1,offspring2):
         # Offspring1 generate mutation condition array True/False for each gen depending on the mutation probability vectrorized
-        mutationCondition1 = (np.random.rand(self.NumberOfGens) < self.mutationProbability)
+        mutationCondition1 = (np.random.rand(7) < self.mutationProbability)
         #print(f'The mutation condition for offspring1 based of probability: {mutationCondition1}') 
-        offspring1 = np.where(mutationCondition1, 1 - offspring1, offspring1)
+        offspring1 = np.where(mutationCondition1, 1 - offspring1.inventory, offspring1.inventory)
         
         # Offspring2 generate mutation condition array True/False for each gen depending on the mutation probability vectrorized
-        mutationCondition2 = (np.random.rand(self.NumberOfGens) < self.mutationProbability)
+        mutationCondition2 = (np.random.rand(7) < self.mutationProbability)
         #print(f'The mutation condition for offspring2 based of probability: {mutationCondition2}')
-        offspring2 = np.where(mutationCondition2, 1 - offspring2, offspring2)
+        offspring2 = np.where(mutationCondition2, 1 - offspring2.inventory, offspring2.inventory)
         
         return offspring1, offspring2
           
