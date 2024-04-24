@@ -290,7 +290,11 @@ class GA:
                     
                     if isinstance(parent1, Bauhaus) or isinstance(parent2, Bauhaus):
                         
-                        self.BauhausShopping()
+                        if isinstance(parent1, Builder):
+                            self.BauhausShopping(parent1)
+                        
+                        elif isinstance(parent2, Builder):
+                            self.BauhausShopping(parent2)
                         
                     else:
                         # Start to "Trade" / Crossover to produce the offspring from the parents
@@ -307,7 +311,7 @@ class GA:
                         #print(f'The best ranked individual in the family is: {individual1}')
                         #print(f'The second best ranked individual in the family is: {individual2}')
                     
-                        self.newpopulation.append(individual1,individual2)
+                        self.newpopulation.extend(individual1,individual2)
                   
                     #print('-----------------------------------')
                 self.Individualfitness = self.CalculateFitness(self.newpopulation)
